@@ -1,9 +1,17 @@
+import ProductList from "./pages/ProductList"
+
+import {
+    QueryClient,
+    QueryClientProvider,
+} from "@tanstack/react-query"
+
+const queryClient = new QueryClient()
+
 function App() {
-
     return (
-        <div className="h-full w-full bg-neutral-900">
-
-        </div>
+        <QueryClientProvider client={queryClient}>
+            <ProductList />
+        </QueryClientProvider>
     )
 }
 
