@@ -3,6 +3,7 @@ import type { ChangeEvent } from "react"
 import Divider from "../components/Divider"
 import Input from "../components/Input"
 import ProductTable from "../templates/ProductTable"
+import { ArrowDown, ArrowUp, BanknoteArrowDown, BanknoteArrowUp, Barcode, ChevronLeft, ChevronRight, FileSpreadsheet, MoveDown, NotebookPen, NotebookTabs, Printer, Sheet, Text, Upload } from "lucide-react"
 
 type ProductFilters = {
     codigo: string
@@ -59,15 +60,30 @@ const ProductList = () => {
     }
 
     return (
-        <main className="flex flex-col gap-4 min-h-screen p-4 bg-neutral-100">
+        <main className="flex flex-col gap-4 h-screen p-4 bg-neutral-100 overflow-hidden">
             <header className="flex flex-row justify-between">
                 <h1 className="text-2xl font-semibold">Estoque atual</h1>
-                <button
-                    type="button"
-                    className="bg-green-600 px-2 rounded text-white"
-                >
-                    Importar produto
-                </button>
+                <div className="flex flex-row gap-4">
+                    <button
+                        type="button"
+                        className="bg-orange-600 px-2 rounded text-white flex flex-row items-center gap-2"
+                    >
+                        <Upload />
+                        <span className="group-hover:w-16 group-hover:flex hidden duration-150">Importar</span>
+                    </button>
+                    <button
+                        type="button"
+                        className="bg-blue-600 px-2 rounded text-white flex flex-row items-center gap-2"
+                    >
+                        <FileSpreadsheet />
+                    </button>
+                    <button
+                        type="button"
+                        className="bg-green-600 px-2 rounded text-white flex flex-row items-center gap-2"
+                    >
+                        <NotebookPen />
+                    </button>
+                </div>
             </header>
 
             <Divider />
@@ -76,6 +92,7 @@ const ProductList = () => {
                 <Input
                     id="code"
                     label="Codigo do Produto"
+                    icon={Barcode}
                     placeholder="00000"
                     type="text"
                     value={filters.codigo}
@@ -84,6 +101,7 @@ const ProductList = () => {
                 <Input
                     id="name"
                     label="Nome do Produto"
+                    icon={Text}
                     placeholder="PRODUTO 01"
                     type="text"
                     value={filters.nome}
@@ -92,6 +110,7 @@ const ProductList = () => {
                 <Input
                     id="amount-min"
                     label="Quantidade minima"
+                    icon={ArrowDown}
                     placeholder="0"
                     type="number"
                     min={0}
@@ -101,6 +120,7 @@ const ProductList = () => {
                 <Input
                     id="amount-max"
                     label="Quantidade maxima"
+                    icon={ArrowUp}
                     placeholder="999"
                     type="number"
                     min={0}
@@ -110,6 +130,7 @@ const ProductList = () => {
                 <Input
                     id="price-decimal-min"
                     label="Preco minimo (decimal)"
+                    icon={BanknoteArrowDown}
                     placeholder="0.00"
                     type="number"
                     min={0}
@@ -120,6 +141,7 @@ const ProductList = () => {
                 <Input
                     id="price-decimal-max"
                     label="Preco maximo (decimal)"
+                    icon={BanknoteArrowUp}
                     placeholder="9999.99"
                     type="number"
                     min={0}
@@ -129,46 +151,45 @@ const ProductList = () => {
                 />
             </form>
 
-            <Divider />
+            <ProductTable filters={filters} />
 
             <div className="flex flex-row justify-end gap-2">
                 <button
                     type="button"
-                    className="bg-neutral-800 p-1 rounded text-white"
+                    className="bg-neutral-800 p-1 rounded text-white cursor-pointer"
                     onClick={() => changePage(-1)}
                 >
-                    ◀
+                    <ChevronLeft />
                 </button>
                 <input
                     id="page"
                     placeholder="1"
                     type="number"
                     min={1}
-                    className="w-12 bg-neutral-200 rounded text-center"
+                    className="w-10 bg-neutral-200 rounded text-center"
                     value={filters.page}
                     onChange={handleFilterChange("page")}
                 />
+                <button
+                    type="button"
+                    className="bg-neutral-800 p-1 rounded text-white cursor-pointer"
+                    onClick={() => changePage(1)}
+                >
+                    <ChevronRight />
+                </button>
                 <input
                     id="limit"
-                    placeholder="20"
+                    placeholder="10"
                     type="number"
                     min={1}
-                    className="w-12 bg-neutral-200 rounded text-center"
+                    className="w-10 bg-neutral-200 rounded text-center"
                     value={filters.limit}
                     onChange={handleFilterChange("limit")}
                 />
-                <button
-                    type="button"
-                    className="bg-neutral-800 p-1 rounded text-white"
-                    onClick={() => changePage(1)}
-                >
-                    ▶
-                </button>
             </div>
-
-            <ProductTable filters={filters} />
         </main>
     )
 }
 
 export default ProductList
+

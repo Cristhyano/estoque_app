@@ -1,4 +1,4 @@
-﻿import {
+import {
     Table,
     TableBody,
     TableCell,
@@ -45,45 +45,61 @@ const ProductTable = ({ filters }: ProductTableProps) => {
 
     if (error) return "An error has occurred: " + error.message
 
-    const rows = Array.isArray(data) ? data : []
+    const rows = Array.isArray(data?.items) ? data?.items : []
 
     return (
-        <div className="relative">
-            <div className="absolute -top-10">
-                {(isFetching || isPending) ? "Carregando..." : "Lista Atualizada"}
+        <div className="flex flex-col h-full overflow-hidden rounded">
+            <div className="flex-1 overflow-y-auto">
+                <Table className="uppercase overflow-visible rounded">
+                    <TableHeader>
+                        <TableRow className="sticky top-0 z-10 bg-neutral-200">
+                            <TableHead className="text-left">cod.</TableHead>
+                            <TableHead className="text-left">nome</TableHead>
+                            <TableHead className="text-center">qtd.</TableHead>
+                            <TableHead className="text-right">valor</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {rows.map((item: any) => {
+                            return (
+                                <TableRow key={item.codigo} className="hover:bg-neutral-400/20 duration-200">
+                                    <TableCell className="text-left">{item.codigo}</TableCell>
+                                    <TableCell className="text-left">{item.nome}</TableCell>
+                                    <TableCell className="text-center">{item.quantidade}</TableCell>
+                                    <TableCell className="text-right">{item.preco_decimal}</TableCell>
+                                </TableRow>
+                            )
+                        })}
+                    </TableBody>
+                    <TableFooter>
+                        <TableRow className="sticky bottom-0 z-10 bg-neutral-300">
+                            <TableCell></TableCell>
+                            <TableCell></TableCell>
+                            <TableCell className="text-center">{data?.totals?.quantidade}</TableCell>
+                            <TableCell className="text-right">{data?.totals?.preco_decimal}</TableCell>
+                        </TableRow>
+                    </TableFooter>
+                </Table>
             </div>
-            <Table className="uppercase">
-                <TableHeader>
-                    <TableRow>
-                        <TableHead>cod.</TableHead>
-                        <TableHead>nome</TableHead>
-                        <TableHead>qtd.</TableHead>
-                        <TableHead>valor</TableHead>
-                    </TableRow>
-                </TableHeader>
-                <TableBody>
-                    {rows.map((item: any) => {
-                        return (
-                            <TableRow key={item.codigo}>
-                                <TableCell>{item.codigo}</TableCell>
-                                <TableCell>{item.nome}</TableCell>
-                                <TableCell>{item.quantidade}</TableCell>
-                                <TableCell>{item.preco_decimal}</TableCell>
-                            </TableRow>
-                        )
-                    })}
-                </TableBody>
-                <TableFooter>
-                    <TableRow>
-                        <TableCell>00000</TableCell>
-                        <TableCell>00000</TableCell>
-                        <TableCell>00000</TableCell>
-                        <TableCell>00000</TableCell>
-                    </TableRow>
-                </TableFooter>
-            </Table>
+
+            <div>
+                {
+                    (isFetching || isPending) ?
+                        <div className="flex flex-row items-center gap-2">
+                            {/* <ReloadIcon className="animate-spin" /> */}
+                            Carregando
+                        </div>
+                        :
+                        <div className="flex flex-row items-center gap-2">
+                            {/* <CheckIcon /> */}
+                            {data?.total_items} itens, {data?.total_pages} paginas
+                        </div>
+                }
+            </div>
         </div>
     )
 }
 
 export default ProductTable
+
+
