@@ -88,8 +88,11 @@ function importInventarioFromCsvContent(content) {
       continue;
     }
 
+
     const codigoRaw = String(cols[1] ?? "").trim();
     const nome = String(cols[3] ?? "").trim();
+    if(nome.includes("BARRA DE CHOC. HERSHEYS MEIO AMA"))
+        console.log("teste")
     const { codigo, codigo_barras } = normalizeCodigoFields(codigoRaw, "");
     const quantidade = Number(String(cols[5] ?? "").replace(",", "."));
     const preco_unitario = parsePtBrDecimalToInteger(

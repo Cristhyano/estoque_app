@@ -39,7 +39,7 @@ npm run dev
 - `controllers/`: handlers das rotas.
 - `utils/`: validacoes, filtros, parsing e persistencia em JSON.
 - `services/`: logica de importacao.
-- `swagger/`: setup do Swagger.
+- `swagger/`: setup e schemas do Swagger.
 
 ## Estado atual da API
 
@@ -49,8 +49,8 @@ npm run dev
 - Configuracoes: CRUD em `/config` (padrao `fator_conversao = 100`).
 - Importacao: `POST /import` detecta PDF/CSV e faz upsert; `/import/produtos` e `/import/inventario` continuam.
 - Regra de codigo: se `codigo` tiver mais de 5 caracteres, entra em `codigo_barras`; `codigo` curto fica em `codigo`.
-- Upsert: usa `codigo` quando presente, senao `codigo_barras` (com compatibilidade para dados antigos).
-- Produtos: CRUD em `/products`; filtro por `codigo`, `nome`, `quantidade_min/max`, `preco_min/max`, `preco_decimal_min/max`.
+- Upsert: usa `codigo` quando presente, senao `codigo_barras` com fallback por codigo no inicio do nome (removendo zeros a esquerda).
+- Produtos: CRUD em `/products`; filtro por `codigo`, `codigo_barras`, `nome`, `quantidade_min/max`, `preco_min/max`, `preco_decimal_min/max`.
 - Paginacao opcional: `page` e `limit` em `/products` e `/inventarios`.
 - Select: `GET /products/select?codigo=...` retorna `codigo` e `nome`.
 - Inventarios (conferencia): CRUD em `/inventarios` com `inicio`, `fim`, `status`.
