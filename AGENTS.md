@@ -31,3 +31,16 @@ npm run dev
 
 - Sem suite automatizada no momento.
 - Validar manualmente via Swagger em `/api-docs`.
+
+## Estado atual da API
+
+- Base: Node/Express com Swagger e CORS para `http://localhost:5173`.
+- Persistencia em JSON: `data/products.json`, `data/config.json`, `data/inventarios.json`.
+- Financeiro: `preco_unitario` e inteiro; respostas incluem `preco_decimal` (calculado por `fator_conversao`).
+- Configuracoes: CRUD em `/config` (padrao `fator_conversao = 100`).
+- Importacao: `POST /import/inventario` le `resources/inventario.csv` e faz upsert por `codigo`.
+- Produtos: CRUD em `/products`; filtro por `codigo`, `nome`, `quantidade_min/max`, `preco_min/max`, `preco_decimal_min/max`.
+- Paginacao opcional: `page` e `limit` em `/products` e `/inventarios`.
+- Select: `GET /products/select?codigo=...` retorna `codigo` e `nome`.
+- Inventarios (conferencia): CRUD em `/inventarios` com `inicio`, `fim`, `status`.
+- Seed: arquivo `seed.json` com 100 produtos de teste.

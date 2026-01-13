@@ -64,8 +64,21 @@ Swagger em `http://localhost:3001/api-docs`.
 - `preco_min`, `preco_max` (inteiro armazenado)
 - `preco_decimal_min`, `preco_decimal_max` (decimal convertido pelo fator)
 - `page`, `limit` (paginacao opcional)
+- `include_totals` (retorna objeto com totais mesmo sem paginacao)
 
-`GET /inventarios` tambem aceita `page` e `limit`.
+`GET /inventarios` tambem aceita `page`, `limit` e `include_totals`.
+
+Quando `page`, `limit` ou `include_totals` for informado, a resposta vira um objeto com:
+
+- `items` (lista paginada ou completa)
+- `total_items`
+- `total_pages`
+- `page`
+- `limit`
+- `totals` (soma das colunas numericas apos filtros, antes da paginacao)
+
+Em `GET /products`, `totals` inclui `quantidade`, `preco_unitario` e `preco_decimal`.
+Em `GET /inventarios` e `GET /products/select`, `totals` retorna objeto vazio.
 
 ### Exemplo de cadastro
 

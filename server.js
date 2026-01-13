@@ -129,6 +129,21 @@ function withDecimalValue(product, config) {
   };
 }
 
+function computeProductTotals(products, config) {
+  const totals = products.reduce(
+    (acc, item) => {
+      acc.quantidade += item.quantidade;
+      acc.preco_unitario += item.preco_unitario;
+      return acc;
+    },
+    { quantidade: 0, preco_unitario: 0 }
+  );
+  return {
+    ...totals,
+    preco_decimal: toDecimalValue(totals.preco_unitario, config.fator_conversao),
+  };
+}
+
 function applyProductFilters(products, query) {
   let result = products;
 
@@ -167,17 +182,51 @@ function applyProductFilters(products, query) {
   return result;
 }
 
-function applyPagination(items, query) {
+function getPaginationParams(query) {
   const page = Number(query.page);
   const limit = Number(query.limit);
   if (!Number.isFinite(page) && !Number.isFinite(limit)) {
-    return items;
+    return null;
   }
 
   const safeLimit = Number.isFinite(limit) && limit > 0 ? Math.floor(limit) : 20;
   const safePage = Number.isFinite(page) && page > 0 ? Math.floor(page) : 1;
-  const start = (safePage - 1) * safeLimit;
-  return items.slice(start, start + safeLimit);
+  return { page: safePage, limit: safeLimit };
+}
+
+function shouldIncludeTotals(query) {
+  const raw = String(query.include_totals ?? query.includeTotals ?? "")
+    .trim()
+    .toLowerCase();
+  return ["1", "true", "yes", "y"].includes(raw);
+}
+
+function buildListResponse(items, query, totals) {
+  const params = getPaginationParams(query);
+  const includeTotals = shouldIncludeTotals(query);
+  if (!params && !includeTotals) {
+    return { pagedItems: items, response: null };
+  }
+
+  const total_items = items.length;
+  const page = params ? params.page : 1;
+  const limit = params ? params.limit : total_items;
+  const total_pages =
+    limit > 0 ? (total_items === 0 ? 0 : Math.ceil(total_items / limit)) : 0;
+  const start = (page - 1) * limit;
+  const pagedItems = params ? items.slice(start, start + limit) : items;
+
+  return {
+    pagedItems,
+    response: {
+      items: pagedItems,
+      total_items,
+      total_pages,
+      page,
+      limit,
+      totals: totals ?? {},
+    },
+  };
 }
 
 function readConfig() {
@@ -317,7 +366,92 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
  *           type: array
  *           items:
  *             type: string
+ *     PaginationMeta:
+ *       type: object
+ *       properties:
+ *         total_items:
+ *           type: integer
+ *           example: 120
+ *         total_pages:
+ *           type: integer
+ *           example: 6
+ *         page:
+ *           type: integer
+ *           example: 1
+ *         limit:
+ *           type: integer
+ *           example: 20
+ *     PaginatedProducts:
+ *       type: object
+ *       properties:
+ *         items:
+ *           type: array
+ *           items:
+ *             $ref: '#/components/schemas/Product'
+ *         total_items:
+ *           type: integer
+ *         total_pages:
+ *           type: integer
+ *         page:
+ *           type: integer
+ *         limit:
+ *           type: integer
+ *         totals:
+ *           type: object
+ *           properties:
+ *             quantidade:
+ *               type: integer
+ *             preco_unitario:
+ *               type: integer
+ *             preco_decimal:
+ *               type: number
+ *           description: Soma das colunas numericas com base no filtro
+ *     ProductSelect:
+ *       type: object
+ *       properties:
+ *         codigo:
+ *           type: string
+ *         nome:
+ *           type: string
+ *     PaginatedProductSelect:
+ *       type: object
+ *       properties:
+ *         items:
+ *           type: array
+ *           items:
+ *             $ref: '#/components/schemas/ProductSelect'
+ *         total_items:
+ *           type: integer
+ *         total_pages:
+ *           type: integer
+ *         page:
+ *           type: integer
+ *         limit:
+ *           type: integer
+ *         totals:
+ *           type: object
+ *           description: Sem colunas numericas somaveis
+ *     PaginatedInventoryPeriods:
+ *       type: object
+ *       properties:
+ *         items:
+ *           type: array
+ *           items:
+ *             $ref: '#/components/schemas/InventoryPeriod'
+ *         total_items:
+ *           type: integer
+ *         total_pages:
+ *           type: integer
+ *         page:
+ *           type: integer
+ *         limit:
+ *           type: integer
+ *         totals:
+ *           type: object
+ *           description: Sem colunas numericas somaveis
  *     ImportResult:
+
+
  *       type: object
  *       properties:
  *         created:
@@ -449,15 +583,22 @@ app.get("/", (req, res) => {
  *         schema:
  *           type: integer
  *         description: Itens por pagina (opcional)
+ *       - in: query
+ *         name: include_totals
+ *         schema:
+ *           type: boolean
+ *         description: Retorna objeto com totais mesmo sem paginacao
  *     responses:
  *       200:
  *         description: Lista de produtos
  *         content:
  *           application/json:
  *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Product'
+ *               oneOf:
+ *                 - type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Product'
+ *                 - $ref: '#/components/schemas/PaginatedProducts'
  */
 app.get("/products", (req, res) => {
   const products = readProducts();
@@ -476,8 +617,15 @@ app.get("/products", (req, res) => {
     filtered = filtered.filter((item) => item.preco_unitario <= maxValue);
   }
 
-  const paginated = applyPagination(filtered, req.query);
-  res.json(paginated.map((product) => withDecimalValue(product, config)));
+  const totals = computeProductTotals(filtered, config);
+  const listResponse = buildListResponse(filtered, req.query, totals);
+  const payload = listResponse.pagedItems.map((product) =>
+    withDecimalValue(product, config)
+  );
+  if (listResponse.response) {
+    return res.json({ ...listResponse.response, items: payload });
+  }
+  res.json(payload);
 });
 
 /**
@@ -492,20 +640,32 @@ app.get("/products", (req, res) => {
  *         schema:
  *           type: string
  *         description: Filtro por codigo (parcial)
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *         description: Pagina (opcional)
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *         description: Itens por pagina (opcional)
+ *       - in: query
+ *         name: include_totals
+ *         schema:
+ *           type: boolean
+ *         description: Retorna objeto com totais mesmo sem paginacao
  *     responses:
  *       200:
  *         description: Lista enxuta de produtos
  *         content:
  *           application/json:
  *             schema:
- *               type: array
- *               items:
- *                 type: object
- *                 properties:
- *                   codigo:
- *                     type: string
- *                   nome:
- *                     type: string
+ *               oneOf:
+ *                 - type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/ProductSelect'
+ *                 - $ref: '#/components/schemas/PaginatedProductSelect'
  */
 app.get("/products/select", (req, res) => {
   const products = readProducts();
@@ -513,7 +673,12 @@ app.get("/products/select", (req, res) => {
   const filtered = codigo
     ? products.filter((item) => item.codigo.toLowerCase().includes(codigo))
     : products;
-  res.json(filtered.map((item) => ({ codigo: item.codigo, nome: item.nome })));
+  const items = filtered.map((item) => ({ codigo: item.codigo, nome: item.nome }));
+  const listResponse = buildListResponse(items, req.query, {});
+  if (listResponse.response) {
+    return res.json(listResponse.response);
+  }
+  res.json(listResponse.pagedItems);
 });
 
 /**
@@ -930,19 +1095,30 @@ app.post("/import/inventario", (req, res) => {
  *         schema:
  *           type: integer
  *         description: Itens por pagina (opcional)
+ *       - in: query
+ *         name: include_totals
+ *         schema:
+ *           type: boolean
+ *         description: Retorna objeto com totais mesmo sem paginacao
  *     responses:
  *       200:
  *         description: Lista de inventarios
  *         content:
  *           application/json:
  *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/InventoryPeriod'
+ *               oneOf:
+ *                 - type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/InventoryPeriod'
+ *                 - $ref: '#/components/schemas/PaginatedInventoryPeriods'
  */
 app.get("/inventarios", (req, res) => {
   const periods = readInventoryPeriods();
-  res.json(applyPagination(periods, req.query));
+  const listResponse = buildListResponse(periods, req.query, {});
+  if (listResponse.response) {
+    return res.json(listResponse.response);
+  }
+  res.json(listResponse.pagedItems);
 });
 
 /**
