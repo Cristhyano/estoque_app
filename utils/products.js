@@ -90,7 +90,7 @@ function normalizeCodigoFields(codigoRaw, codigoBarrasRaw) {
 function getCodigoFromNome(nome) {
   const match = String(nome ?? "")
     .trim()
-    .match(/^(\d+)\b/);
+    .match(/^(\d{1,5})\b/);
   if (!match) return "";
   return match[1].replace(/^0+/, "") || "";
 }
@@ -181,7 +181,10 @@ function parseProductsFromPdfText(text, config) {
     const precoRaw = columns[columns.length - 1];
     const quantidadeRaw = columns[columns.length - 2];
     const nome = columns.slice(1, -2).join(" ").trim();
-    const { codigo, codigo_barras } = normalizeCodigoFields(codigoRaw, "");
+    const codigoFromNome = getCodigoFromNome(nome);
+    const codigo =
+      codigoFromNome || (codigoRaw.length > 0 && codigoRaw.length <= 5 ? codigoRaw : "");
+    const codigo_barras = codigoRaw.length > 5 ? codigoRaw : "";
 
     const quantidade = Number(
       String(quantidadeRaw ?? "").replace(/\./g, "").replace(",", ".")
@@ -218,6 +221,7 @@ module.exports = {
   applyProductFilters,
   parsePtBrDecimalToInteger,
   normalizeCodigoFields,
+  getCodigoFromNome,
   getImportLookupKey,
   parseProductInput,
   parseProductsFromPdfText,

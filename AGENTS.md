@@ -49,7 +49,9 @@ npm run dev
 - Configuracoes: CRUD em `/config` (padrao `fator_conversao = 100`).
 - Importacao: `POST /import` detecta PDF/CSV e faz upsert; `/import/produtos` e `/import/inventario` continuam.
 - Regra de codigo: se `codigo` tiver mais de 5 caracteres, entra em `codigo_barras`; `codigo` curto fica em `codigo`.
-- Upsert: usa `codigo` quando presente, senao `codigo_barras` com fallback por codigo no inicio do nome (removendo zeros a esquerda).
+- PDF: codigo do produto e extraido do inicio do nome (ate 5 digitos); barcode usa o campo de codigo do PDF.
+- CSV: codigo vem da coluna do arquivo; nome nao e usado para extrair codigo.
+- Upsert: tenta casar por nome (normalizado, removendo digitos iniciais) antes de `codigo`/`codigo_barras`.
 - Produtos: CRUD em `/products`; filtro por `codigo`, `codigo_barras`, `nome`, `quantidade_min/max`, `preco_min/max`, `preco_decimal_min/max`.
 - Paginacao opcional: `page` e `limit` em `/products` e `/inventarios`.
 - Select: `GET /products/select?codigo=...` retorna `codigo` e `nome`.

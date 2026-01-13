@@ -5,8 +5,16 @@ const {
   parsePtBrDecimalToInteger,
   normalizeCodigoFields,
   getImportLookupKey,
+  getCodigoFromNome,
 } = require("../utils/products");
 const { readConfig, readProducts, writeProducts } = require("../utils/storage");
+
+function normalizeName(nome) {
+  return String(nome ?? "")
+    .trim()
+    .replace(/^\d+\s*/, "")
+    .toLowerCase();
+}
 
 async function importProductsFromPdfBuffer(pdfBuffer) {
   const config = readConfig();
@@ -21,17 +29,52 @@ async function importProductsFromPdfBuffer(pdfBuffer) {
     parseProductsFromPdfText(parsed.text, config);
   const products = readProducts();
   const indexByKey = new Map();
+  const indexByName = new Map();
   products.forEach((item, index) => {
     if (item.codigo) indexByKey.set(`codigo:${item.codigo}`, index);
     if (item.codigo_barras) indexByKey.set(`barras:${item.codigo_barras}`, index);
+    const nameKey = normalizeName(item.nome);
+    if (nameKey) indexByName.set(nameKey, index);
   });
   const seenKeys = new Set();
+  const seenNames = new Set();
 
   let created = 0;
   let updated = 0;
   let skipped = skippedInvalid;
 
   for (const product of parsedProducts) {
+    if (!product.codigo) {
+      const codigoFromNome = getCodigoFromNome(product.nome);
+      if (codigoFromNome) {
+        product.codigo = codigoFromNome;
+      }
+    }
+    const nameKey = normalizeName(product.nome);
+    if (nameKey && indexByName.has(nameKey)) {
+      if (seenNames.has(nameKey)) {
+        skipped += 1;
+        continue;
+      }
+      const existingIndex = indexByName.get(nameKey);
+      const existing = products[existingIndex];
+      const merged = {
+        ...existing,
+        codigo: product.codigo || existing.codigo,
+        codigo_barras: product.codigo_barras || existing.codigo_barras,
+      };
+      products[existingIndex] = merged;
+      if (merged.codigo) {
+        indexByKey.set(`codigo:${merged.codigo}`, existingIndex);
+      }
+      if (merged.codigo_barras) {
+        indexByKey.set(`barras:${merged.codigo_barras}`, existingIndex);
+      }
+      updated += 1;
+      seenNames.add(nameKey);
+      continue;
+    }
+
     const lookupKey = getImportLookupKey(indexByKey, product);
 
     if (!lookupKey) {
@@ -47,15 +90,22 @@ async function importProductsFromPdfBuffer(pdfBuffer) {
     const existingIndex = indexByKey.get(lookupKey);
     if (existingIndex === undefined) {
       products.push(product);
+      const newIndex = products.length - 1;
       if (product.codigo) {
-        indexByKey.set(`codigo:${product.codigo}`, products.length - 1);
+        indexByKey.set(`codigo:${product.codigo}`, newIndex);
       }
       if (product.codigo_barras) {
-        indexByKey.set(`barras:${product.codigo_barras}`, products.length - 1);
+        indexByKey.set(`barras:${product.codigo_barras}`, newIndex);
+      }
+      if (nameKey) {
+        indexByName.set(nameKey, newIndex);
       }
       created += 1;
     } else {
       products[existingIndex] = product;
+      if (nameKey) {
+        indexByName.set(nameKey, existingIndex);
+      }
       updated += 1;
     }
     seenKeys.add(lookupKey);
@@ -69,9 +119,12 @@ function importInventarioFromCsvContent(content) {
   const config = readConfig();
   const products = readProducts();
   const indexByKey = new Map();
+  const indexByName = new Map();
   products.forEach((item, index) => {
     if (item.codigo) indexByKey.set(`codigo:${item.codigo}`, index);
     if (item.codigo_barras) indexByKey.set(`barras:${item.codigo_barras}`, index);
+    const nameKey = normalizeName(item.nome);
+    if (nameKey) indexByName.set(nameKey, index);
   });
 
   const lines = content.split(/\r?\n/);
@@ -91,8 +144,6 @@ function importInventarioFromCsvContent(content) {
 
     const codigoRaw = String(cols[1] ?? "").trim();
     const nome = String(cols[3] ?? "").trim();
-    if(nome.includes("BARRA DE CHOC. HERSHEYS MEIO AMA"))
-        console.log("teste")
     const { codigo, codigo_barras } = normalizeCodigoFields(codigoRaw, "");
     const quantidade = Number(String(cols[5] ?? "").replace(",", "."));
     const preco_unitario = parsePtBrDecimalToInteger(
@@ -117,6 +168,25 @@ function importInventarioFromCsvContent(content) {
       continue;
     }
 
+    const nameKey = normalizeName(product.nome);
+    if (nameKey && indexByName.has(nameKey)) {
+      const existingIndex = indexByName.get(nameKey);
+      const existing = products[existingIndex];
+      const merged = {
+        ...product,
+        codigo_barras: existing.codigo_barras || product.codigo_barras,
+      };
+      products[existingIndex] = merged;
+      if (merged.codigo) {
+        indexByKey.set(`codigo:${merged.codigo}`, existingIndex);
+      }
+      if (merged.codigo_barras) {
+        indexByKey.set(`barras:${merged.codigo_barras}`, existingIndex);
+      }
+      updated += 1;
+      continue;
+    }
+
     const lookupKey = getImportLookupKey(indexByKey, product);
     if (!lookupKey) {
       skipped += 1;
@@ -126,15 +196,22 @@ function importInventarioFromCsvContent(content) {
     const existingIndex = indexByKey.get(lookupKey);
     if (existingIndex === undefined) {
       products.push(product);
+      const newIndex = products.length - 1;
       if (product.codigo) {
-        indexByKey.set(`codigo:${product.codigo}`, products.length - 1);
+        indexByKey.set(`codigo:${product.codigo}`, newIndex);
       }
       if (product.codigo_barras) {
-        indexByKey.set(`barras:${product.codigo_barras}`, products.length - 1);
+        indexByKey.set(`barras:${product.codigo_barras}`, newIndex);
+      }
+      if (nameKey) {
+        indexByName.set(nameKey, newIndex);
       }
       created += 1;
     } else {
       products[existingIndex] = product;
+      if (nameKey) {
+        indexByName.set(nameKey, existingIndex);
+      }
       updated += 1;
     }
   }
