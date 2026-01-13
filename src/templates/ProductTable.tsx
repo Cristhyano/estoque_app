@@ -71,14 +71,11 @@ const ProductTable = ({ filters }: ProductTableProps) => {
                         {rows.map((item: any, index: number) => {
                             const codigoProduto = String(item.codigo ?? "")
                             const codigoBarras = String(item.codigo_barras ?? "")
-                            const codigo = codigoProduto || codigoBarras
-                            const codigoProdutoFinal = codigoProduto || (codigo.length > 5 ? "" : codigo)
-                            const codigoBarrasFinal = codigoBarras || (codigo.length > 5 ? codigo : "")
                             const rowKey = item.codigo || item.codigo_barras || `${item.nome}-${index}`
                             return (
                                 <TableRow key={rowKey} className="hover:bg-neutral-400/20 duration-200">
-                                    <TableCell className="text-left">{codigoProdutoFinal}</TableCell>
-                                    <TableCell className="text-left">{codigoBarrasFinal}</TableCell>
+                                    <TableCell className="text-left">{codigoProduto}</TableCell>
+                                    <TableCell className="text-left">{codigoBarras}</TableCell>
                                     <TableCell className="text-left">{item.nome}</TableCell>
                                     <TableCell className="text-center">{item.quantidade}</TableCell>
                                     <TableCell className="text-right">
