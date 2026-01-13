@@ -24,6 +24,12 @@ type ProductTableProps = {
     filters: ProductFilters
 }
 
+const formatCurrency = (value: number) =>
+    new Intl.NumberFormat("pt-BR", {
+        style: "currency",
+        currency: "BRL",
+    }).format(value)
+
 const ProductTable = ({ filters }: ProductTableProps) => {
     const { isPending, error, data, isFetching } = useQuery({
         queryKey: ["products", filters],
@@ -59,6 +65,7 @@ const ProductTable = ({ filters }: ProductTableProps) => {
                             <TableHead className="text-right">valor</TableHead>
                         </TableRow>
                     </TableHeader>
+                    
                     <TableBody>
                         {rows.map((item: any) => {
                             return (
@@ -66,17 +73,22 @@ const ProductTable = ({ filters }: ProductTableProps) => {
                                     <TableCell className="text-left">{item.codigo}</TableCell>
                                     <TableCell className="text-left">{item.nome}</TableCell>
                                     <TableCell className="text-center">{item.quantidade}</TableCell>
-                                    <TableCell className="text-right">{item.preco_decimal}</TableCell>
+                                    <TableCell className="text-right">
+                                        {formatCurrency(Number(item.preco_decimal))}
+                                    </TableCell>
                                 </TableRow>
                             )
                         })}
                     </TableBody>
+
                     <TableFooter>
-                        <TableRow className="sticky bottom-0 z-10 bg-neutral-300">
+                        <TableRow className="sticky bottom-0 z-10 bg-neutral-200">
                             <TableCell></TableCell>
                             <TableCell></TableCell>
                             <TableCell className="text-center">{data?.totals?.quantidade}</TableCell>
-                            <TableCell className="text-right">{data?.totals?.preco_decimal}</TableCell>
+                            <TableCell className="text-right">
+                                {formatCurrency(Number(data?.totals?.preco_decimal))}
+                            </TableCell>
                         </TableRow>
                     </TableFooter>
                 </Table>
@@ -101,5 +113,4 @@ const ProductTable = ({ filters }: ProductTableProps) => {
 }
 
 export default ProductTable
-
 

@@ -66,20 +66,19 @@ const ProductList = () => {
                 <div className="flex flex-row gap-4">
                     <button
                         type="button"
-                        className="bg-orange-600 px-2 rounded text-white flex flex-row items-center gap-2"
+                        className="bg-orange-600 px-2 rounded text-white flex flex-row items-center gap-2 cursor-pointer"
                     >
                         <Upload />
-                        <span className="group-hover:w-16 group-hover:flex hidden duration-150">Importar</span>
                     </button>
                     <button
                         type="button"
-                        className="bg-blue-600 px-2 rounded text-white flex flex-row items-center gap-2"
+                        className="bg-blue-600 px-2 rounded text-white flex flex-row items-center gap-2 cursor-pointer"
                     >
                         <FileSpreadsheet />
                     </button>
                     <button
                         type="button"
-                        className="bg-green-600 px-2 rounded text-white flex flex-row items-center gap-2"
+                        className="bg-green-600 px-2 rounded text-white flex flex-row items-center gap-2 cursor-pointer"
                     >
                         <NotebookPen />
                     </button>
