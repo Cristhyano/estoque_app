@@ -58,8 +58,9 @@ const ProductTable = ({ filters }: ProductTableProps) => {
             <div className="flex-1 overflow-y-auto">
                 <Table className="uppercase overflow-visible rounded">
                     <TableHeader>
-                        <TableRow className="sticky top-0 z-10 bg-neutral-200">
+                        <TableRow className="sticky top-0 bg-neutral-200">
                             <TableHead className="text-left">cod.</TableHead>
+                            <TableHead className="text-left">cod. barras</TableHead>
                             <TableHead className="text-left">nome</TableHead>
                             <TableHead className="text-center">qtd.</TableHead>
                             <TableHead className="text-right">valor</TableHead>
@@ -67,10 +68,17 @@ const ProductTable = ({ filters }: ProductTableProps) => {
                     </TableHeader>
                     
                     <TableBody>
-                        {rows.map((item: any) => {
+                        {rows.map((item: any, index: number) => {
+                            const codigoProduto = String(item.codigo ?? "")
+                            const codigoBarras = String(item.codigo_barras ?? "")
+                            const codigo = codigoProduto || codigoBarras
+                            const codigoProdutoFinal = codigoProduto || (codigo.length > 5 ? "" : codigo)
+                            const codigoBarrasFinal = codigoBarras || (codigo.length > 5 ? codigo : "")
+                            const rowKey = item.codigo || item.codigo_barras || `${item.nome}-${index}`
                             return (
-                                <TableRow key={item.codigo} className="hover:bg-neutral-400/20 duration-200">
-                                    <TableCell className="text-left">{item.codigo}</TableCell>
+                                <TableRow key={rowKey} className="hover:bg-neutral-400/20 duration-200">
+                                    <TableCell className="text-left">{codigoProdutoFinal}</TableCell>
+                                    <TableCell className="text-left">{codigoBarrasFinal}</TableCell>
                                     <TableCell className="text-left">{item.nome}</TableCell>
                                     <TableCell className="text-center">{item.quantidade}</TableCell>
                                     <TableCell className="text-right">
@@ -82,7 +90,8 @@ const ProductTable = ({ filters }: ProductTableProps) => {
                     </TableBody>
 
                     <TableFooter>
-                        <TableRow className="sticky bottom-0 z-10 bg-neutral-200">
+                        <TableRow className="sticky bottom-0 bg-neutral-200">
+                            <TableCell></TableCell>
                             <TableCell></TableCell>
                             <TableCell></TableCell>
                             <TableCell className="text-center">{data?.totals?.quantidade}</TableCell>
@@ -113,4 +122,3 @@ const ProductTable = ({ filters }: ProductTableProps) => {
 }
 
 export default ProductTable
-
