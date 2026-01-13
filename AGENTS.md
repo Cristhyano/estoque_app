@@ -32,13 +32,24 @@ npm run dev
 - Sem suite automatizada no momento.
 - Validar manualmente via Swagger em `/api-docs`.
 
+## Arquitetura minima
+
+- `server.js`: wiring da API (middlewares + routers).
+- `routes/`: declaracao das rotas.
+- `controllers/`: handlers das rotas.
+- `utils/`: validacoes, filtros, parsing e persistencia em JSON.
+- `services/`: logica de importacao.
+- `swagger/`: setup do Swagger.
+
 ## Estado atual da API
 
 - Base: Node/Express com Swagger e CORS para `http://localhost:5173`.
 - Persistencia em JSON: `data/products.json`, `data/config.json`, `data/inventarios.json`.
 - Financeiro: `preco_unitario` e inteiro; respostas incluem `preco_decimal` (calculado por `fator_conversao`).
 - Configuracoes: CRUD em `/config` (padrao `fator_conversao = 100`).
-- Importacao: `POST /import/inventario` le `resources/inventario.csv` e faz upsert por `codigo`.
+- Importacao: `POST /import` detecta PDF/CSV e faz upsert; `/import/produtos` e `/import/inventario` continuam.
+- Regra de codigo: se `codigo` tiver mais de 5 caracteres, entra em `codigo_barras`; `codigo` curto fica em `codigo`.
+- Upsert: usa `codigo` quando presente, senao `codigo_barras` (com compatibilidade para dados antigos).
 - Produtos: CRUD em `/products`; filtro por `codigo`, `nome`, `quantidade_min/max`, `preco_min/max`, `preco_decimal_min/max`.
 - Paginacao opcional: `page` e `limit` em `/products` e `/inventarios`.
 - Select: `GET /products/select?codigo=...` retorna `codigo` e `nome`.

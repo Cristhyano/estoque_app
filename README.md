@@ -38,13 +38,22 @@ Swagger em `http://localhost:3001/api-docs`.
 - `PUT /config`
 - `DELETE /config`
 
+- `POST /import`
 - `POST /import/inventario`
+- `POST /import/produtos`
 
 - `GET /inventarios`
 - `GET /inventarios/:id`
 - `POST /inventarios`
 - `PUT /inventarios/:id`
 - `DELETE /inventarios/:id`
+
+
+## Importacoes
+
+- `/import` aceita upload via `multipart/form-data` (campo `file`) e decide o tipo pelo arquivo (PDF ou CSV).
+- `/import/inventario` aceita upload via `multipart/form-data` (campo `file`) ou usa `resources/inventario.csv`.
+- `/import/produtos` aceita upload via `multipart/form-data` (campo `file`) ou usa `resources/Listagem do Cadastro de Produtos.PDF` e ignora codigos ja existentes.
 
 ## Regras financeiras
 
