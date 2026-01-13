@@ -81,7 +81,7 @@ function parsePtBrDecimalToInteger(value, fator) {
 function normalizeCodigoFields(codigoRaw, codigoBarrasRaw) {
   const codigo = String(codigoRaw ?? "").trim();
   const codigo_barras = String(codigoBarrasRaw ?? "").trim();
-  if (codigo && codigo.length > 5 && !codigo_barras) {
+  if (codigo && codigo.length > 6 && !codigo_barras) {
     return { codigo: "", codigo_barras: codigo };
   }
   return { codigo, codigo_barras };
@@ -90,7 +90,7 @@ function normalizeCodigoFields(codigoRaw, codigoBarrasRaw) {
 function getCodigoFromNome(nome) {
   const match = String(nome ?? "")
     .trim()
-    .match(/^(\d{1,5})\b/);
+    .match(/^(\d{1,6})\b/);
   if (!match) return "";
   return match[1].replace(/^0+/, "") || "";
 }
@@ -183,8 +183,8 @@ function parseProductsFromPdfText(text, config) {
     const nome = columns.slice(1, -2).join(" ").trim();
     const codigoFromNome = getCodigoFromNome(nome);
     const codigo =
-      codigoFromNome || (codigoRaw.length > 0 && codigoRaw.length <= 5 ? codigoRaw : "");
-    const codigo_barras = codigoRaw.length > 5 ? codigoRaw : "";
+      codigoFromNome || (codigoRaw.length > 0 && codigoRaw.length <= 6 ? codigoRaw : "");
+    const codigo_barras = codigoRaw.length > 6 ? codigoRaw : "";
 
     const quantidade = Number(
       String(quantidadeRaw ?? "").replace(/\./g, "").replace(",", ".")
