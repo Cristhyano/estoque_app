@@ -25,7 +25,7 @@
 - `src/templates/ProductTable.tsx`: formata moeda com `Intl.NumberFormat("pt-BR")`.
 - `src/components/Input.tsx`: aceita `icon` como `ReactNode` ou `ElementType`.
 - Rotas com TanStack Router: `/` (lista de produtos) e `/scan` (leitura por scanner).
-- Navegacao: botao na lista de produtos abre a tela de leitura.
+- Navegacao: botao na lista de produtos abre a tela de leitura; botao na tela de leitura finaliza inventario.
 
 ## API e filtros disponiveis
 Endpoint: `GET /products`
