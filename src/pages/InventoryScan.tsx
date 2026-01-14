@@ -32,10 +32,18 @@ type ProdutoInventarioItem = {
     } | null
 }
 
+type InventoryPeriod = {
+    id: string
+    nome: string | null
+    inicio: string
+    fim: string | null
+    status: string
+}
+
 type ProdutoInventarioOpenResponse = {
     inventario: {
         id: string
-        nome: string
+        nome: string | null
         inicio: string
         fim: string | null
         status: string
@@ -65,7 +73,7 @@ type ProdutoInventarioResponse = {
     }
     inventario: {
         id: string
-        nome: string
+        nome: string | null
         inicio: string
         fim: string | null
         status: string
@@ -100,15 +108,29 @@ const InventoryScan = () => {
     const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
     const [highlightId, setHighlightId] = useState<string | null>(null)
     const [removeQuantities, setRemoveQuantities] = useState<Record<string, string>>({})
+    const [selectedInventoryId, setSelectedInventoryId] = useState("")
 
     const { data, isPending, isFetching, error } = useQuery<ProdutoInventarioOpenResponse>({
-        queryKey: ["produto-inventario-open"],
+        queryKey: ["produto-inventario-open", selectedInventoryId],
         queryFn: async () => {
-            const response = await fetch("http://localhost:3001/produto-inventario/aberto")
+            const query = selectedInventoryId ? `?inventario_id=${selectedInventoryId}` : ""
+            const response = await fetch(`http://localhost:3001/produto-inventario/aberto${query}`)
             if (!response.ok) {
                 throw new Error("Falha ao carregar leituras")
             }
             return await response.json()
+        },
+    })
+
+    const { data: openInventories } = useQuery<InventoryPeriod[]>({
+        queryKey: ["inventarios-open"],
+        queryFn: async () => {
+            const response = await fetch("http://localhost:3001/inventarios?status=aberto&limit=200")
+            if (!response.ok) {
+                throw new Error("Falha ao carregar inventarios")
+            }
+            const payload = await response.json()
+            return Array.isArray(payload?.items) ? payload.items : payload
         },
     })
 
@@ -136,7 +158,10 @@ const InventoryScan = () => {
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify(payload),
+                body: JSON.stringify({
+                    ...payload,
+                    inventarioId: selectedInventoryId || undefined,
+                }),
             })
             if (!response.ok) {
                 const errorBody = await response.json().catch(() => ({}))
@@ -266,6 +291,12 @@ const InventoryScan = () => {
     }, [])
 
     useEffect(() => {
+        if (!selectedInventoryId && data?.inventario?.id) {
+            setSelectedInventoryId(data.inventario.id)
+        }
+    }, [data?.inventario?.id, selectedInventoryId])
+
+    useEffect(() => {
         if (!mutation.isPending) {
             inputRef.current?.focus()
         }
@@ -309,6 +340,34 @@ const InventoryScan = () => {
             </header>
 
             <Divider />
+
+            <div className="flex flex-col gap-1">
+                <label className="text-sm font-medium" htmlFor="inventario-select">
+                    Inventario ativo
+                </label>
+                <select
+                    id="inventario-select"
+                    className="bg-neutral-200 rounded px-2 py-1"
+                    value={selectedInventoryId}
+                    onChange={(event) => {
+                        const nextId = event.target.value
+                        if (nextId === selectedInventoryId) return
+                        if (!window.confirm("Trocar inventario ativo?")) return
+                        setSelectedInventoryId(nextId)
+                    }}
+                >
+                    {(openInventories ?? []).length === 0 && (
+                        <option value="" disabled>
+                            Nenhum inventario aberto
+                        </option>
+                    )}
+                    {(openInventories ?? []).map((inventario) => (
+                        <option key={inventario.id} value={inventario.id}>
+                            {inventario.nome ?? "Inventario sem nome"} - {inventario.id}
+                        </option>
+                    ))}
+                </select>
+            </div>
 
             <form onSubmit={handleSubmit}>
                 <Input

@@ -11,7 +11,7 @@ import {
     Tag,
 } from "lucide-react"
 import { useNavigate } from "@tanstack/react-router"
-import { useQueryClient } from "@tanstack/react-query"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 import * as Dialog from "@radix-ui/react-dialog"
 
 type InventoryFilters = {
@@ -23,6 +23,14 @@ type InventoryFilters = {
     sort_dir: string
     page: string
     limit: string
+}
+
+type InventoryPeriod = {
+    id: string
+    nome: string | null
+    inicio: string
+    fim: string | null
+    status: string
 }
 
 const InventoryList = () => {
@@ -49,6 +57,19 @@ const InventoryList = () => {
     } | null>(null)
     const [importInputKey, setImportInputKey] = useState(0)
     const [isDialogOpen, setIsDialogOpen] = useState(false)
+    const [selectedImportInventoryId, setSelectedImportInventoryId] = useState("")
+
+    const { data: openInventories } = useQuery<InventoryPeriod[]>({
+        queryKey: ["inventarios-open"],
+        queryFn: async () => {
+            const response = await fetch("http://localhost:3001/inventarios?status=aberto&limit=200")
+            if (!response.ok) {
+                throw new Error("Falha ao carregar inventarios")
+            }
+            const payload = await response.json()
+            return Array.isArray(payload?.items) ? payload.items : payload
+        },
+    })
 
     const handleFilterChange = (key: keyof InventoryFilters) =>
         (event: ChangeEvent<HTMLInputElement>) => {
@@ -89,6 +110,9 @@ const InventoryList = () => {
         try {
             const formData = new FormData()
             formData.append("file", importFile)
+            if (selectedImportInventoryId) {
+                formData.append("inventario_id", selectedImportInventoryId)
+            }
             const response = await fetch("http://localhost:3001/inventarios/import", {
                 method: "POST",
                 body: formData,
@@ -123,6 +147,7 @@ const InventoryList = () => {
             setImportFile(null)
             setImportResult(null)
             setImportInputKey((prev) => prev + 1)
+            setSelectedImportInventoryId("")
         }
     }
 
@@ -164,6 +189,21 @@ const InventoryList = () => {
                                         accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                                         onChange={(event) => setImportFile(event.target.files?.[0] ?? null)}
                                     />
+                                </label>
+                                <label className="flex flex-col gap-1 text-sm font-medium">
+                                    Inventario destino (opcional)
+                                    <select
+                                        className="bg-neutral-200 px-2 py-1 rounded"
+                                        value={selectedImportInventoryId}
+                                        onChange={(event) => setSelectedImportInventoryId(event.target.value)}
+                                    >
+                                        <option value="">Criar novo inventario</option>
+                                        {(openInventories ?? []).map((inventario) => (
+                                            <option key={inventario.id} value={inventario.id}>
+                                                {inventario.nome ?? "Inventario sem nome"} - {inventario.id}
+                                            </option>
+                                        ))}
+                                    </select>
                                 </label>
                                 {importStatus && (
                                     <span className="text-sm text-neutral-700">{importStatus}</span>
