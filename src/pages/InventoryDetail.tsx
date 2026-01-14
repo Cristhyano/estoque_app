@@ -190,9 +190,31 @@ const InventoryDetail = () => {
     const totalPages = totalItems === 0 ? 0 : Math.ceil(totalItems / limit)
     const start = (page - 1) * limit
     const rows = filteredItems.slice(start, start + limit)
-    const totalQuantidade = rawItems.reduce(
-        (sum, item) => sum + Number(item.qtd_conferida ?? item.quantidade ?? 0),
-        0
+    const totals = rawItems.reduce(
+        (acc, item) => {
+            const qtdSistema = Number(item.qtd_sistema ?? 0)
+            const qtdConferida = Number(item.qtd_conferida ?? item.quantidade ?? 0)
+            const ajuste = Number(item.ajuste ?? 0)
+            const valorSistema = Number(item.valor_sistema ?? 0)
+            const valorConferido = Number(item.valor_conferido ?? 0)
+            const diferencaValor = Number(item.diferenca_valor ?? 0)
+            return {
+                qtdSistema: acc.qtdSistema + qtdSistema,
+                qtdConferida: acc.qtdConferida + qtdConferida,
+                ajuste: acc.ajuste + ajuste,
+                valorSistema: acc.valorSistema + valorSistema,
+                valorConferido: acc.valorConferido + valorConferido,
+                diferencaValor: acc.diferencaValor + diferencaValor,
+            }
+        },
+        {
+            qtdSistema: 0,
+            qtdConferida: 0,
+            ajuste: 0,
+            valorSistema: 0,
+            valorConferido: 0,
+            diferencaValor: 0,
+        }
     )
 
     const isLoading = inventoryQuery.isPending || productInventoryQuery.isPending || productsQuery.isPending
@@ -312,12 +334,12 @@ const InventoryDetail = () => {
                                 <TableCell></TableCell>
                                 <TableCell></TableCell>
                                 <TableCell></TableCell>
-                                <TableCell></TableCell>
-                                <TableCell className="text-center">{totalQuantidade}</TableCell>
-                                <TableCell></TableCell>
-                                <TableCell></TableCell>
-                                <TableCell></TableCell>
-                                <TableCell></TableCell>
+                                <TableCell className="text-center">{totals.qtdSistema}</TableCell>
+                                <TableCell className="text-center">{totals.qtdConferida}</TableCell>
+                                <TableCell className="text-center">{totals.ajuste}</TableCell>
+                                <TableCell className="text-right">{formatCurrency(totals.valorSistema)}</TableCell>
+                                <TableCell className="text-right">{formatCurrency(totals.valorConferido)}</TableCell>
+                                <TableCell className="text-right">{formatCurrency(totals.diferencaValor)}</TableCell>
                             </TableRow>
                         </TableFooter>
                     </Table>
