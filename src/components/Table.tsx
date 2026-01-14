@@ -110,7 +110,7 @@ export const TablePagination = ({
                 type="number"
                 min={1}
                 max={effectiveMaxPage}
-                className="w-10 bg-neutral-200 rounded text-center"
+                className="w-24 bg-neutral-200 rounded text-center"
                 value={page}
                 onChange={handlePageChange}
             />
@@ -127,7 +127,7 @@ export const TablePagination = ({
                 placeholder="10"
                 type="number"
                 min={1}
-                className="w-10 bg-neutral-200 rounded text-center"
+                className="w-24 bg-neutral-200 rounded text-center"
                 value={limit}
                 onChange={handleLimitChange}
             />
