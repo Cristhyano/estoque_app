@@ -48,6 +48,32 @@ function listProdutoInventario(req, res) {
   res.json(listResponse.pagedItems);
 }
 
+function resolveProductById(products, id) {
+  return (
+    products.find((item) => item.codigo === id) ||
+    products.find((item) => item.codigo_barras === id) ||
+    null
+  );
+}
+
+function listOpenProdutoInventario(req, res) {
+  const products = readProducts();
+  const periods = readInventoryPeriods();
+  const { inventory, created } = ensureOpenInventory(periods);
+  if (created) {
+    writeInventoryPeriods(periods);
+  }
+
+  const items = readProductInventory()
+    .filter((item) => item.id_inventario === inventory.id)
+    .map((item) => ({
+      ...item,
+      produto: resolveProductById(products, item.id_produto),
+    }));
+
+  res.json({ inventario: inventory, items });
+}
+
 function createProdutoInventario(req, res) {
   const parsed = parseCodeInput(req.body);
   if (parsed.error) {
@@ -72,17 +98,20 @@ function createProdutoInventario(req, res) {
     (item) =>
       item.id_produto === productId && item.id_inventario === inventory.id
   );
+  const now = new Date().toISOString();
 
   if (index >= 0) {
     items[index] = {
       ...items[index],
       quantidade: Number(items[index].quantidade ?? 0) + 1,
+      last_read: now,
     };
   } else {
     items.push({
       id_produto: productId,
       id_inventario: inventory.id,
       quantidade: 1,
+      last_read: now,
     });
   }
 
@@ -177,6 +206,7 @@ function deleteProdutoInventario(req, res) {
 
 module.exports = {
   listProdutoInventario,
+  listOpenProdutoInventario,
   createProdutoInventario,
   updateProdutoInventario,
   deleteProdutoInventario,

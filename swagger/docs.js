@@ -143,6 +143,10 @@
  *         quantidade:
  *           type: integer
  *           example: 3
+ *         last_read:
+ *           type: string
+ *           format: date-time
+ *           nullable: true
  *     ProdutoInventarioInput:
  *       type: object
  *       properties:
@@ -172,6 +176,20 @@
  *           $ref: '#/components/schemas/InventoryPeriod'
  *         relacionamento:
  *           $ref: '#/components/schemas/ProdutoInventario'
+ *     ProdutoInventarioOpen:
+ *       type: object
+ *       properties:
+ *         inventario:
+ *           $ref: '#/components/schemas/InventoryPeriod'
+ *         items:
+ *           type: array
+ *           items:
+ *             allOf:
+ *               - $ref: '#/components/schemas/ProdutoInventario'
+ *               - type: object
+ *                 properties:
+ *                   produto:
+ *                     $ref: '#/components/schemas/Product'
  *     PaginatedProdutoInventario:
  *       type: object
  *       properties:

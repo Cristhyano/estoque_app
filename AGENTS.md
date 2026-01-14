@@ -44,7 +44,7 @@ npm run dev
 ## Estado atual da API
 
 - Base: Node/Express com Swagger e CORS para `http://localhost:5173`.
-- Persistencia em JSON: `data/products.json`, `data/config.json`, `data/inventarios.json`.
+- Persistencia em JSON: `data/products.json`, `data/config.json`, `data/inventarios.json`, `data/produto_inventario.json`.
 - Financeiro: `preco_unitario` e inteiro; respostas incluem `preco_decimal` (calculado por `fator_conversao`).
 - Configuracoes: CRUD em `/config` (padrao `fator_conversao = 100`).
 - Importacao: `POST /import` detecta PDF/CSV e faz upsert; `/import/produtos` e `/import/inventario` continuam.
@@ -57,6 +57,6 @@ npm run dev
 - Paginacao opcional: `page` e `limit` em `/products` e `/inventarios`.
 - Select: `GET /products/select?codigo=...` retorna `codigo` e `nome`.
 - Inventarios (conferencia): CRUD em `/inventarios` com `inicio`, `fim`, `status`.
-- ProdutoInventario: CRUD em `/produto-inventario`; `POST` incrementa quantidade no inventario aberto usando codigo ou codigo_barras.
+- ProdutoInventario: `GET /produto-inventario/aberto` lista itens do inventario aberto; `POST /produto-inventario` incrementa quantidade usando codigo ou codigo_barras.
 - Relacionamentos persistem em `data/produto_inventario.json` e inventario aberto e criado automaticamente.
 - Seed: arquivo `seed.json` com 100 produtos de teste.

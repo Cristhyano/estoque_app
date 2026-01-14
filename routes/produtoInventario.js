@@ -1,6 +1,7 @@
 const express = require("express");
 const {
   listProdutoInventario,
+  listOpenProdutoInventario,
   createProdutoInventario,
   updateProdutoInventario,
   deleteProdutoInventario,
@@ -40,6 +41,21 @@ const router = express.Router();
  *                 - $ref: '#/components/schemas/PaginatedProdutoInventario'
  */
 router.get("/", listProdutoInventario);
+/**
+ * @swagger
+ * /produto-inventario/aberto:
+ *   get:
+ *     tags: [ProdutoInventario]
+ *     summary: Lista produtos lidos no inventario aberto
+ *     responses:
+ *       200:
+ *         description: Inventario aberto e itens lidos
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ProdutoInventarioOpen'
+ */
+router.get("/aberto", listOpenProdutoInventario);
 /**
  * @swagger
  * /produto-inventario:
