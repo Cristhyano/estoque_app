@@ -45,6 +45,7 @@ type ProdutoInventarioOpenResponse = {
 }
 
 type ProdutoInventarioRead = {
+    id?: string
     id_produto: string
     id_inventario: string
     created_at?: string | null
@@ -70,6 +71,7 @@ type ProdutoInventarioResponse = {
         status: string
     }
     leitura: {
+        id?: string
         id_produto: string
         id_inventario: string
         created_at?: string | null
@@ -97,6 +99,7 @@ const InventoryScan = () => {
     const [code, setCode] = useState("")
     const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
     const [highlightId, setHighlightId] = useState<string | null>(null)
+    const [removeQuantities, setRemoveQuantities] = useState<Record<string, string>>({})
 
     const { data, isPending, isFetching, error } = useQuery<ProdutoInventarioOpenResponse>({
         queryKey: ["produto-inventario-open"],
@@ -195,6 +198,36 @@ const InventoryScan = () => {
         onSettled: () => {
             setCode("")
             inputRef.current?.focus()
+        },
+    })
+
+    const deleteMutation = useMutation({
+        mutationFn: async (payload: { id: string; inventoryId?: string; quantidade?: number }) => {
+            const searchParams = new URLSearchParams()
+            if (payload.quantidade) {
+                searchParams.set("quantidade", String(payload.quantidade))
+            }
+            if (payload.inventoryId) {
+                searchParams.set("inventario_id", payload.inventoryId)
+            }
+            const query = searchParams.toString()
+            const response = await fetch(
+                `http://localhost:3001/leituras/${payload.id}${query ? `?${query}` : ""}`,
+                { method: "DELETE" }
+            )
+            if (!response.ok) {
+                const errorBody = await response.json().catch(() => ({}))
+                const errorMessage =
+                    errorBody?.error || "Erro ao remover leitura"
+                throw new Error(errorMessage)
+            }
+            return (await response.json()) as ProdutoInventarioOpenResponse
+        },
+        onSuccess: (payload) => {
+            queryClient.setQueryData(["produto-inventario-open"], payload)
+        },
+        onError: (err: Error) => {
+            setMessage({ type: "error", text: err.message })
         },
     })
 
@@ -318,13 +351,14 @@ const InventoryScan = () => {
                                     <TableHead className="text-left">nome</TableHead>
                                     <TableHead className="text-right">preco</TableHead>
                                     <TableHead className="text-left">horario</TableHead>
+                                    <TableHead className="text-right">acao</TableHead>
                                 </TableRow>
                             </TableHeader>
 
                             <TableBody>
                                 {recentReads.length === 0 ? (
                                     <TableRow>
-                                        <TableCell colSpan={4} className="text-center">
+                                        <TableCell colSpan={5} className="text-center">
                                             Nenhuma leitura recente
                                         </TableCell>
                                     </TableRow>
@@ -346,6 +380,20 @@ const InventoryScan = () => {
                                                 <TableCell className="text-left">
                                                     {formatDateTime(read.created_at)}
                                                 </TableCell>
+                                                <TableCell className="text-right">
+                                                    <button
+                                                        type="button"
+                                                        className="text-xs text-red-600 hover:text-red-800"
+                                                        onClick={() => {
+                                                            if (!read.id) return
+                                                            if (!window.confirm("Remover leitura?")) return
+                                                            deleteMutation.mutate({ id: read.id })
+                                                        }}
+                                                        disabled={!read.id || deleteMutation.isPending}
+                                                    >
+                                                        Excluir
+                                                    </button>
+                                                </TableCell>
                                             </TableRow>
                                         )
                                     })
@@ -365,19 +413,20 @@ const InventoryScan = () => {
                                     <TableHead className="text-left">nome</TableHead>
                                     <TableHead className="text-center">qtd.</TableHead>
                                     <TableHead className="text-right">ultima leitura</TableHead>
+                                    <TableHead className="text-right">remover</TableHead>
                                 </TableRow>
                             </TableHeader>
 
                             <TableBody>
                                 {isPending ? (
                                     <TableRow>
-                                        <TableCell colSpan={5} className="text-center">
+                                        <TableCell colSpan={6} className="text-center">
                                             Carregando
                                         </TableCell>
                                     </TableRow>
                                 ) : items.length === 0 ? (
                                     <TableRow>
-                                        <TableCell colSpan={5} className="text-center">
+                                        <TableCell colSpan={6} className="text-center">
                                             Nenhuma leitura ainda
                                         </TableCell>
                                     </TableRow>
@@ -392,6 +441,8 @@ const InventoryScan = () => {
                                         const qtdConferida = Number(
                                             item.qtd_conferida ?? item.quantidade ?? 0
                                         )
+                                        const draftQuantidade =
+                                            removeQuantities[item.id_produto] ?? "1"
                                         return (
                                             <TableRow
                                                 key={rowKey}
@@ -408,6 +459,54 @@ const InventoryScan = () => {
                                                 </TableCell>
                                                 <TableCell className="text-right">
                                                     {formatDateTime(item.last_read)}
+                                                </TableCell>
+                                                <TableCell className="text-right">
+                                                    <div className="flex items-center justify-end gap-2">
+                                                        <input
+                                                            className="w-14 bg-neutral-200 rounded px-2 py-1 text-center text-sm"
+                                                            type="number"
+                                                            min={1}
+                                                            max={qtdConferida}
+                                                            value={draftQuantidade}
+                                                            onChange={(event) => {
+                                                                setRemoveQuantities((prev) => ({
+                                                                    ...prev,
+                                                                    [item.id_produto]: event.target.value,
+                                                                }))
+                                                            }}
+                                                        />
+                                                        <button
+                                                            type="button"
+                                                            className="text-xs text-red-600 hover:text-red-800"
+                                                            onClick={() => {
+                                                                const quantidade = Math.max(
+                                                                    1,
+                                                                    Math.floor(
+                                                                        Number(
+                                                                            removeQuantities[item.id_produto] ?? 1
+                                                                        )
+                                                                    )
+                                                                )
+                                                                if (quantidade > qtdConferida) {
+                                                                    window.alert("Quantidade invalida")
+                                                                    return
+                                                                }
+                                                                const confirmText =
+                                                                    quantidade >= qtdConferida
+                                                                        ? "Remover todas as leituras?"
+                                                                        : `Remover ${quantidade} leitura(s)?`
+                                                                if (!window.confirm(confirmText)) return
+                                                                deleteMutation.mutate({
+                                                                    id: item.id_produto,
+                                                                    inventoryId: item.id_inventario,
+                                                                    quantidade,
+                                                                })
+                                                            }}
+                                                            disabled={deleteMutation.isPending}
+                                                        >
+                                                            Remover
+                                                        </button>
+                                                    </div>
                                                 </TableCell>
                                             </TableRow>
                                         )
