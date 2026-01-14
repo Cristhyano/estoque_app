@@ -8,21 +8,27 @@
 ## Estrutura atual relevante
 - `src/components/Table.tsx`: contem todos os componentes de tabela (Table, TableHeader, TableBody, TableFooter, TableRow, TableHead, TableCell).
 - `src/templates/ProductTable.tsx`: tabela que consome a API e renderiza os produtos.
-- `src/pages/ProductList.tsx`: pagina com formulario de filtros e controles de paginacao.
+- `src/pages/ProductList.tsx`: pagina com formulario de filtros, importacao e controles de paginacao.
 - `src/components/Input.tsx` e `src/components/Divider.tsx`: componentes base.
-- `..\estoque_api\server.js`: wiring da API.
-- `..\estoque_api\routes/`: declaracao das rotas.
-- `..\estoque_api\controllers/`: handlers das rotas.
-- `..\estoque_api\utils/`: validacoes, filtros, parsing, persistencia.
-- `..\estoque_api\services/`: importacao (PDF/CSV).
-- `..\estoque_api\swagger/`: setup do Swagger.
+- `../estoque_api/server.js`: wiring da API.
+- `../estoque_api/routes/`: declaracao das rotas.
+- `../estoque_api/controllers/`: handlers das rotas.
+- `../estoque_api/utils/`: validacoes, filtros, parsing, persistencia.
+- `../estoque_api/services/`: importacao (PDF/CSV).
+- `../estoque_api/swagger/`: setup do Swagger.
+
+## UI atual
+- `src/pages/ProductList.tsx`: header com botao de upload (Radix Dialog), formulario de filtros, tabela e paginacao.
+- `src/templates/ProductTable.tsx`: usa React Query, scroll apenas no corpo da tabela, header e footer fixos (sticky).
+- `src/templates/ProductTable.tsx`: formata moeda com `Intl.NumberFormat("pt-BR")`.
+- `src/components/Input.tsx`: aceita `icon` como `ReactNode` ou `ElementType`.
 
 ## API e filtros disponiveis
 Endpoint: `GET /products`
 Filtros via query string:
 - `codigo` (exato)
 - `codigo_barras` (exato)
-- `nome` (cont?m, case-insensitive)
+- `nome` (contem, case-insensitive)
 - `quantidade_min`, `quantidade_max`
 - `preco_min`, `preco_max` (inteiro armazenado)
 - `preco_decimal_min`, `preco_decimal_max` (decimal convertido pelo fator)
@@ -33,10 +39,10 @@ Paginacao via query:
 Importacao:
 - `POST /import` recebe PDF/CSV e decide o tipo automaticamente.
 - `POST /import/produtos` e `POST /import/inventario` continuam validos.
-- Regra de codigo: se `codigo` tiver mais de 5 caracteres vai para `codigo_barras`; `codigo` curto fica em `codigo`.
-- PDF: codigo do produto vem do inicio do nome (ate 5 digitos); barcode vai para `codigo_barras`.
+- Regra de codigo: se `codigo` tiver mais de 6 caracteres vai para `codigo_barras`; `codigo` curto fica em `codigo`.
+- PDF: codigo do produto vem do inicio do nome (ate 6 digitos); barcode usa o campo de codigo do PDF quando tiver mais de 6.
 - CSV: codigo vem da coluna do arquivo; nome nao e usado para extrair codigo.
- - Upsert: cruza por nome normalizado (remove digitos iniciais) antes de `codigo`/`codigo_barras`.
+- Upsert: cruza por nome normalizado (remove digitos iniciais) antes de `codigo`/`codigo_barras`.
 
 ## Implementacoes feitas
 - Formulario completo de filtros ligado ao estado em `src/pages/ProductList.tsx`.
@@ -47,6 +53,7 @@ Importacao:
 - Componentes de tabela consolidados em um unico arquivo.
 - Dialog de importacao (Radix) com upload, feedback e bloqueio de fechamento durante importacao.
 - Tabela com colunas separadas para `codigo` e `codigo_barras`.
+- Header/footer sticky com scroll apenas no corpo da tabela.
 - API refatorada para arquitetura minima com `routes/`, `controllers/`, `utils/`, `services/` e `swagger/`.
 
 ## Decisoes/importantes
@@ -56,6 +63,7 @@ Importacao:
 ## Commit
 - `feat(ui): add product filters and pagination` (repo `estoque_ui`).
 - `feat(ui): import dialog and table updates` (repo `estoque_ui`).
+- `chore(ui): align product codes display` (repo `estoque_ui`).
 
 ## Possiveis proximos passos
 - Ajustar layout dos filtros/paginacao em grid.
