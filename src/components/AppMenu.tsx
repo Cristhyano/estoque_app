@@ -6,11 +6,9 @@ type MenuItem = {
 }
 
 const menuItems: MenuItem[] = [
-    { label: "Home", to: "/" },
-    { label: "Produtos", to: "/produtos" },
+    { label: "Produtos", to: "/" },
     { label: "Inventarios", to: "/inventarios" },
-    { label: "Leitura", to: "/scan" },
-    { label: "Relatorios", to: "/relatorios" },
+    { label: "Leitura", to: "/scan" }
 ]
 
 const AppMenu = () => {

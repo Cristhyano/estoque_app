@@ -222,7 +222,7 @@ const InventoryScan = () => {
     const totalQuantidade = items.reduce((sum, item) => sum + (item.quantidade ?? 0), 0)
 
     return (
-        <main className="flex flex-col gap-4 min-h-screen p-4 bg-neutral-100 overflow-hidden">
+        <>
             <header className="flex flex-row justify-between">
                 <h1 className="text-2xl font-semibold">Leitura de produtos</h1>
                 <button
@@ -357,7 +357,7 @@ const InventoryScan = () => {
                     )}
                 </div>
             </div>
-        </main>
+        </>
     )
 }
 

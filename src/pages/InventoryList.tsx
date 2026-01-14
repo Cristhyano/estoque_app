@@ -67,23 +67,9 @@ const InventoryList = () => {
     }
 
     return (
-        <main className="flex flex-col gap-4 min-h-screen p-4 bg-neutral-100 overflow-hidden">
+        <>
             <header className="flex flex-row justify-between">
                 <h1 className="text-2xl font-semibold">Inventarios</h1>
-                <div className="flex flex-row gap-4">
-                    <Link
-                        to="/produtos"
-                        className="bg-neutral-800 px-2 rounded text-white flex flex-row items-center gap-2 cursor-pointer"
-                    >
-                        Produtos
-                    </Link>
-                    <Link
-                        to="/scan"
-                        className="bg-neutral-800 px-2 rounded text-white flex flex-row items-center gap-2 cursor-pointer"
-                    >
-                        Leitura
-                    </Link>
-                </div>
             </header>
 
             <Divider />
@@ -170,7 +156,7 @@ const InventoryList = () => {
                     onChange={handleFilterChange("limit")}
                 />
             </div>
-        </main>
+        </>
     )
 }
 

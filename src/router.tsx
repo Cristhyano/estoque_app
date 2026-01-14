@@ -1,30 +1,22 @@
 import { Outlet, createRootRoute, createRoute, createRouter } from "@tanstack/react-router"
 import AppMenu from "./components/AppMenu"
-import Home from "./pages/Home"
 import ProductList from "./pages/ProductList"
 import InventoryScan from "./pages/InventoryScan"
 import InventoryList from "./pages/InventoryList"
 import InventoryDetail from "./pages/InventoryDetail"
-import Reports from "./pages/Reports"
 
 const rootRoute = createRootRoute({
     component: () => (
-        <div className="min-h-screen bg-neutral-100">
+        <main className="flex flex-col gap-4 min-h-screen p-4 bg-neutral-100 overflow-hidden">
             <AppMenu />
             <Outlet />
-        </div>
+        </main>
     ),
-})
-
-const homeRoute = createRoute({
-    getParentRoute: () => rootRoute,
-    path: "/",
-    component: Home,
 })
 
 const productRoute = createRoute({
     getParentRoute: () => rootRoute,
-    path: "/produtos",
+    path: "/",
     component: ProductList,
 })
 
@@ -46,19 +38,11 @@ const inventoryDetailRoute = createRoute({
     component: InventoryDetail,
 })
 
-const reportsRoute = createRoute({
-    getParentRoute: () => rootRoute,
-    path: "/relatorios",
-    component: Reports,
-})
-
 const routeTree = rootRoute.addChildren([
-    homeRoute,
     productRoute,
     scanRoute,
     inventoryRoute,
-    inventoryDetailRoute,
-    reportsRoute,
+    inventoryDetailRoute
 ])
 
 export const router = createRouter({ routeTree })

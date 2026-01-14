@@ -110,7 +110,7 @@ const ProductTable = ({ filters }: ProductTableProps) => {
                         :
                         <div className="flex flex-row items-center gap-2">
                             {/* <CheckIcon /> */}
-                            {data?.total_items} itens, {data?.total_pages} paginas
+                            {data?.total_items} linhas, {data?.total_pages} paginas
                         </div>
                 }
             </div>
