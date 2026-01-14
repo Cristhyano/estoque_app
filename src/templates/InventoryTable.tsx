@@ -24,7 +24,7 @@ type InventoryFilters = {
 
 type InventoryPeriod = {
     id: string
-    nome: string
+    nome: string | null
     inicio: string
     fim: string | null
     status: string
@@ -222,6 +222,7 @@ const InventoryTable = ({ filters, onSortChange }: InventoryTableProps) => {
                     <TableHeader>
                         <TableRow className="sticky top-0 bg-neutral-200">
                             <TableHead className="text-left">inventario</TableHead>
+                            <TableHead className="text-left">nome</TableHead>
                             <TableHead className="text-left">
                                 <button
                                     type="button"
@@ -258,13 +259,13 @@ const InventoryTable = ({ filters, onSortChange }: InventoryTableProps) => {
                     <TableBody>
                         {isLoading ? (
                             <TableRow>
-                                <TableCell colSpan={7} className="text-center">
+                                <TableCell colSpan={8} className="text-center">
                                     Carregando
                                 </TableCell>
                             </TableRow>
                         ) : inventories.length === 0 ? (
                             <TableRow>
-                                <TableCell colSpan={7} className="text-center">
+                                <TableCell colSpan={8} className="text-center">
                                     Nenhum inventario encontrado
                                 </TableCell>
                             </TableRow>
@@ -280,6 +281,7 @@ const InventoryTable = ({ filters, onSortChange }: InventoryTableProps) => {
                                 return (
                                     <TableRow key={item.id} className="hover:bg-neutral-400/20 duration-200">
                                         <TableCell className="text-left">{item.id}</TableCell>
+                                        <TableCell className="text-left">{item.nome ?? "Inventario sem nome"}</TableCell>
                                         <TableCell className="text-left">
                                             <span className={`px-2 py-0.5 rounded text-xs font-semibold ${statusClass}`}>
                                                 {statusLabel}
@@ -338,6 +340,7 @@ const InventoryTable = ({ filters, onSortChange }: InventoryTableProps) => {
 
                     <TableFooter>
                         <TableRow className="sticky bottom-0 bg-neutral-200">
+                            <TableCell></TableCell>
                             <TableCell></TableCell>
                             <TableCell></TableCell>
                             <TableCell></TableCell>

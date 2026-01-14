@@ -1,6 +1,6 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import type { ChangeEvent } from "react"
-import { useQuery } from "@tanstack/react-query"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { Link, useParams } from "@tanstack/react-router"
 import Divider from "../components/Divider"
 import Input from "../components/Input"
@@ -17,7 +17,7 @@ import { Barcode, ChevronLeft, ChevronRight, PackageSearch } from "lucide-react"
 
 type InventoryPeriod = {
     id: string
-    nome: string
+    nome: string | null
     inicio: string
     fim: string | null
     status: string
@@ -73,6 +73,7 @@ const normalize = (value: string) => value.trim().toLowerCase()
 
 const InventoryDetail = () => {
     const { id } = useParams({ from: "/inventarios/$id" })
+    const queryClient = useQueryClient()
     const [filters, setFilters] = useState<DetailFilters>({
         codigo: "",
         codigo_barras: "",
@@ -80,6 +81,9 @@ const InventoryDetail = () => {
         page: "1",
         limit: "20",
     })
+    const [isEditingName, setIsEditingName] = useState(false)
+    const [nameDraft, setNameDraft] = useState("")
+    const [nameError, setNameError] = useState<string | null>(null)
 
     const handleFilterChange = (key: keyof DetailFilters) =>
         (event: ChangeEvent<HTMLInputElement>) => {
@@ -150,6 +154,62 @@ const InventoryDetail = () => {
     }
 
     const inventory = inventoryQuery.data
+
+    useEffect(() => {
+        if (!isEditingName) {
+            setNameDraft(inventory?.nome ?? "")
+        }
+    }, [inventory?.nome, isEditingName])
+
+    const updateNameMutation = useMutation({
+        mutationFn: async (nextName: string | null) => {
+            const response = await fetch(`http://localhost:3001/inventarios/${id}/nome`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ nome: nextName }),
+            })
+            if (!response.ok) {
+                const errorBody = await response.json().catch(() => ({}))
+                const errorMessage = errorBody?.error || "Erro ao atualizar nome"
+                throw new Error(errorMessage)
+            }
+            return (await response.json()) as InventoryPeriod
+        },
+        onSuccess: (updated) => {
+            queryClient.setQueryData(["inventarios", id], updated)
+            queryClient.invalidateQueries({ queryKey: ["inventarios"] })
+            setIsEditingName(false)
+            setNameError(null)
+            setNameDraft(updated.nome ?? "")
+        },
+        onError: (error: Error) => {
+            setNameError(error.message)
+        },
+    })
+
+    const handleStartEdit = () => {
+        setNameError(null)
+        setIsEditingName(true)
+    }
+
+    const handleCancelEdit = () => {
+        setNameError(null)
+        setIsEditingName(false)
+        setNameDraft(inventory?.nome ?? "")
+    }
+
+    const handleSaveName = () => {
+        if (updateNameMutation.isPending) return
+        const trimmed = nameDraft.trim()
+        if (trimmed && trimmed.length > 100) {
+            setNameError("Nome muito longo")
+            return
+        }
+        setNameError(null)
+        updateNameMutation.mutate(trimmed ? trimmed : null)
+    }
     const productInventory = Array.isArray(productInventoryQuery.data) ? productInventoryQuery.data : []
     const products = Array.isArray(productsQuery.data) ? productsQuery.data : []
 
@@ -225,6 +285,47 @@ const InventoryDetail = () => {
             <header className="flex flex-row justify-between">
                 <div>
                     <h1 className="text-2xl font-semibold">Inventario {inventory?.id ?? ""}</h1>
+                    <div className="mt-1 flex flex-wrap items-center gap-2">
+                        {isEditingName ? (
+                            <input
+                                className="bg-neutral-200 px-2 py-1 rounded text-sm"
+                                value={nameDraft}
+                                onChange={(event) => setNameDraft(event.target.value)}
+                                onBlur={handleSaveName}
+                                onKeyDown={(event) => {
+                                    if (event.key === "Enter") {
+                                        event.preventDefault()
+                                        handleSaveName()
+                                    }
+                                    if (event.key === "Escape") {
+                                        event.preventDefault()
+                                        handleCancelEdit()
+                                    }
+                                }}
+                                disabled={updateNameMutation.isPending}
+                                autoFocus
+                            />
+                        ) : (
+                            <span className="text-sm font-medium text-neutral-800">
+                                {inventory?.nome ?? "Inventario sem nome"}
+                            </span>
+                        )}
+                        {updateNameMutation.isPending && (
+                            <span className="text-xs text-neutral-500">Salvando...</span>
+                        )}
+                        {!isEditingName && (
+                            <button
+                                type="button"
+                                className="text-xs text-neutral-600 hover:text-neutral-800"
+                                onClick={handleStartEdit}
+                            >
+                                Editar
+                            </button>
+                        )}
+                    </div>
+                    {nameError && (
+                        <div className="text-xs text-red-600">{nameError}</div>
+                    )}
                     <div className="text-sm text-neutral-600">
                         {inventory?.nome ?? "Inventario"} - {formatDateTime(inventory?.inicio)} - {formatDateTime(inventory?.fim)}
                     </div>
