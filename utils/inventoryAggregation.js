@@ -100,6 +100,7 @@ function buildRecentReads({ items, products, config, inventoryId, limit = 10 }) 
     .map((item) => {
       const product = productMap.get(item.id_produto) || null;
       return {
+        id: item.id,
         id_produto: String(item.id_produto ?? ""),
         id_inventario: String(item.id_inventario ?? ""),
         created_at: getEventTimestamp(item),

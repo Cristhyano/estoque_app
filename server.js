@@ -7,6 +7,7 @@ const configRoutes = require("./routes/config");
 const importRoutes = require("./routes/import");
 const inventariosRoutes = require("./routes/inventarios");
 const produtoInventarioRoutes = require("./routes/produtoInventario");
+const leiturasRoutes = require("./routes/leituras");
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -25,6 +26,7 @@ app.use("/config", configRoutes);
 app.use("/import", importRoutes);
 app.use("/inventarios", inventariosRoutes);
 app.use("/produto-inventario", produtoInventarioRoutes);
+app.use("/leituras", leiturasRoutes);
 
 app.listen(PORT, () => {
   console.log(`API rodando na porta ${PORT}`);
