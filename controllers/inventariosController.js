@@ -406,6 +406,46 @@ function closeOpenInventario(req, res) {
   res.json(updated);
 }
 
+function mergeInventarios(req, res) {
+  const fromId = String(req.body?.fromInventarioId ?? "").trim();
+  const toId = String(req.body?.toInventarioId ?? "").trim();
+
+  if (!fromId || !toId) {
+    return res.status(400).json({ error: "Inventarios invalidos" });
+  }
+  if (fromId === toId) {
+    return res.status(400).json({ error: "Inventarios iguais" });
+  }
+
+  const periods = readInventoryPeriods();
+  const fromInventory = periods.find((item) => item.id === fromId);
+  const toInventory = periods.find((item) => item.id === toId);
+  if (!fromInventory || !toInventory) {
+    return res.status(404).json({ error: "Inventario nao encontrado" });
+  }
+  if (fromInventory.status !== "aberto" || toInventory.status !== "aberto") {
+    return res.status(400).json({ error: "Inventario fechado" });
+  }
+
+  const items = readProductInventory();
+  let moved = 0;
+  const updatedItems = items.map((item) => {
+    if (item.id_inventario === fromId) {
+      moved += 1;
+      return { ...item, id_inventario: toId };
+    }
+    return item;
+  });
+
+  writeProductInventory(updatedItems);
+
+  res.json({
+    from: fromInventory,
+    to: toInventory,
+    moved,
+  });
+}
+
 async function exportInventario(req, res) {
   const periods = readInventoryPeriods();
   const period = periods.find((item) => item.id === req.params.id);
@@ -502,6 +542,7 @@ module.exports = {
   updateInventario,
   updateInventarioNome,
   importInventarioXlsx,
+  mergeInventarios,
   deleteInventario,
   closeOpenInventario,
   exportInventario,

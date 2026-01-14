@@ -6,6 +6,7 @@ const {
   updateInventario,
   updateInventarioNome,
   importInventarioXlsx,
+  mergeInventarios,
   deleteInventario,
   closeOpenInventario,
   exportInventario,
@@ -83,6 +84,7 @@ router.get("/", listInventarios);
 router.get("/:id/export", exportInventario);
 router.get("/:id", getInventario);
 router.post("/import", upload.single("file"), importInventarioXlsx);
+router.post("/merge", mergeInventarios);
 /**
  * @swagger
  * /inventarios/aberto/fechar:
