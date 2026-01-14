@@ -110,7 +110,7 @@ const ProductList = () => {
     }
 
     return (
-        <main className="flex flex-col gap-4 h-screen p-4 bg-neutral-100 overflow-hidden">
+        <main className="flex flex-col gap-4 min-h-screen p-4 bg-neutral-100 overflow-hidden">
             <header className="flex flex-row justify-between">
                 <h1 className="text-2xl font-semibold">Estoque atual</h1>
                 <div className="flex flex-row gap-4">
