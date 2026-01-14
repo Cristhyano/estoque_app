@@ -73,10 +73,28 @@ function deleteInventario(req, res) {
   res.json(removed);
 }
 
+function closeOpenInventario(req, res) {
+  const periods = readInventoryPeriods();
+  const index = periods.findIndex((item) => item.status === "aberto");
+  if (index === -1) {
+    return res.status(404).json({ error: "Inventario aberto nao encontrado" });
+  }
+  const now = new Date().toISOString();
+  const updated = {
+    ...periods[index],
+    status: "fechado",
+    fim: now,
+  };
+  periods[index] = updated;
+  writeInventoryPeriods(periods);
+  res.json(updated);
+}
+
 module.exports = {
   listInventarios,
   getInventario,
   createInventario,
   updateInventario,
   deleteInventario,
+  closeOpenInventario,
 };

@@ -57,6 +57,7 @@ npm run dev
 - Paginacao opcional: `page` e `limit` em `/products` e `/inventarios`.
 - Select: `GET /products/select?codigo=...` retorna `codigo` e `nome`.
 - Inventarios (conferencia): CRUD em `/inventarios` com `inicio`, `fim`, `status`.
+- Inventarios: `PATCH /inventarios/aberto/fechar` finaliza o inventario aberto.
 - ProdutoInventario: `GET /produto-inventario/aberto` lista itens do inventario aberto; `POST /produto-inventario` incrementa quantidade usando codigo ou codigo_barras.
 - Relacionamentos persistem em `data/produto_inventario.json` e inventario aberto e criado automaticamente.
 - Seed: arquivo `seed.json` com 100 produtos de teste.

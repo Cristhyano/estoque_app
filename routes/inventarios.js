@@ -5,6 +5,7 @@ const {
   createInventario,
   updateInventario,
   deleteInventario,
+  closeOpenInventario,
 } = require("../controllers/inventariosController");
 
 const router = express.Router();
@@ -71,6 +72,27 @@ router.get("/", listInventarios);
  *               $ref: '#/components/schemas/ErrorResponse'
  */
 router.get("/:id", getInventario);
+/**
+ * @swagger
+ * /inventarios/aberto/fechar:
+ *   patch:
+ *     tags: [Inventarios]
+ *     summary: Fecha o inventario atualmente aberto
+ *     responses:
+ *       200:
+ *         description: Inventario fechado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/InventoryPeriod'
+ *       404:
+ *         description: Inventario aberto nao encontrado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
+router.patch("/aberto/fechar", closeOpenInventario);
 /**
  * @swagger
  * /inventarios:
