@@ -229,20 +229,23 @@ async function importInventarioXlsx(req, res) {
   const maxScanRows = Math.min(worksheet.rowCount, 15);
   for (let rowIndex = 1; rowIndex <= maxScanRows; rowIndex += 1) {
     const row = worksheet.getRow(rowIndex);
-    const values = row.values ?? [];
-    const headers = values.map((cell) => normalizeHeader(cell));
-    const codigoIndex = headers.findIndex((value) => value === "COD");
-    const qtdIndex = headers.findIndex(
-      (value) => value === "QTD CONFERIDA"
-    );
-    if (codigoIndex > -1 && qtdIndex > -1) {
+    const headersByName = {};
+    row.eachCell((cell, colNumber) => {
+      const normalized = normalizeHeader(cell.value);
+      if (normalized) {
+        headersByName[normalized] = colNumber;
+      }
+    });
+    const codigoColumn = headersByName["COD"];
+    const qtdColumn = headersByName["QTD CONFERIDA"];
+    if (codigoColumn && qtdColumn) {
       headerRowIndex = rowIndex;
       headerMap = {
-        codigo: codigoIndex,
-        descricao: headers.findIndex((value) => value === "DESCRICAO"),
-        preco: headers.findIndex((value) => value === "PRECO UNITARIO"),
-        qtdSistema: headers.findIndex((value) => value === "QTD SISTEMA"),
-        qtdConferida: qtdIndex,
+        codigo: codigoColumn,
+        descricao: headersByName["DESCRICAO"],
+        preco: headersByName["PRECO UNITARIO"],
+        qtdSistema: headersByName["QTD SISTEMA"],
+        qtdConferida: qtdColumn,
       };
       break;
     }
@@ -259,13 +262,13 @@ async function importInventarioXlsx(req, res) {
     const row = worksheet.getRow(rowIndex);
     if (!row || row.cellCount === 0) continue;
 
-    const codigoRaw = row.getCell(headerMap.codigo + 1).value;
+    const codigoRaw = row.getCell(headerMap.codigo).value;
     const codigo = String(codigoRaw ?? "").trim();
     if (!codigo) {
       continue;
     }
 
-    const qtdRaw = row.getCell(headerMap.qtdConferida + 1).value;
+    const qtdRaw = row.getCell(headerMap.qtdConferida).value;
     const qtdConferida = parseIntegerValue(qtdRaw);
     if (qtdConferida === null || qtdConferida < 0) {
       errors.push({ linha: rowIndex, codigo, erro: "Qtd conferida invalida" });
