@@ -17,6 +17,13 @@ type ProdutoInventarioItem = {
     id_produto: string
     id_inventario: string
     quantidade: number
+    qtd_sistema?: number
+    qtd_conferida?: number
+    ajuste?: number
+    preco_unitario?: number
+    valor_sistema?: number
+    valor_conferido?: number
+    diferenca_valor?: number
     last_read?: string | null
     produto?: {
         codigo?: string
@@ -34,6 +41,19 @@ type ProdutoInventarioOpenResponse = {
         status: string
     }
     items: ProdutoInventarioItem[]
+    recent_reads?: ProdutoInventarioRead[]
+}
+
+type ProdutoInventarioRead = {
+    id_produto: string
+    id_inventario: string
+    created_at?: string | null
+    preco_unitario?: number
+    produto?: {
+        codigo?: string
+        codigo_barras?: string
+        nome?: string
+    } | null
 }
 
 type ProdutoInventarioResponse = {
@@ -49,7 +69,13 @@ type ProdutoInventarioResponse = {
         fim: string | null
         status: string
     }
-    relacionamento: ProdutoInventarioItem
+    leitura: {
+        id_produto: string
+        id_inventario: string
+        created_at?: string | null
+    }
+    acumulado?: ProdutoInventarioItem
+    recent_reads?: ProdutoInventarioRead[]
 }
 
 const formatDateTime = (value?: string | null) => {
@@ -119,9 +145,11 @@ const InventoryScan = () => {
         },
         onSuccess: (payload) => {
             setMessage({ type: "success", text: "Leitura registrada" })
-            const rel = payload.relacionamento
-            const productId = rel.id_produto
-            setHighlightId(productId)
+            const rel = payload.acumulado
+            const productId = rel?.id_produto ?? payload.leitura?.id_produto
+            if (productId) {
+                setHighlightId(productId)
+            }
             if (highlightTimeoutRef.current) {
                 window.clearTimeout(highlightTimeoutRef.current)
             }
@@ -134,21 +162,29 @@ const InventoryScan = () => {
                 (current) => {
                     if (!current) return current
                     const nextItems = [...current.items]
-                    const index = nextItems.findIndex(
-                        (item) =>
-                            item.id_produto === rel.id_produto &&
-                            item.id_inventario === rel.id_inventario
-                    )
-                    const nextItem = {
-                        ...rel,
-                        produto: payload.produto ?? null,
+                    if (rel) {
+                        const index = nextItems.findIndex(
+                            (item) =>
+                                item.id_produto === rel.id_produto &&
+                                item.id_inventario === rel.id_inventario
+                        )
+                        const nextItem = {
+                            ...rel,
+                            produto: payload.produto ?? rel.produto ?? null,
+                        }
+                        if (index >= 0) {
+                            nextItems[index] = nextItem
+                        } else {
+                            nextItems.unshift(nextItem)
+                        }
                     }
-                    if (index >= 0) {
-                        nextItems[index] = nextItem
-                    } else {
-                        nextItems.unshift(nextItem)
+                    const recentReads = payload.recent_reads ?? current.recent_reads ?? []
+                    return {
+                        ...current,
+                        items: nextItems,
+                        inventario: payload.inventario,
+                        recent_reads: recentReads,
                     }
-                    return { ...current, items: nextItems, inventario: payload.inventario }
                 }
             )
         },
@@ -219,7 +255,11 @@ const InventoryScan = () => {
     }
 
     const items = data?.items ?? []
-    const totalQuantidade = items.reduce((sum, item) => sum + (item.quantidade ?? 0), 0)
+    const recentReads = data?.recent_reads ?? []
+    const totalQuantidade = items.reduce(
+        (sum, item) => sum + Number(item.qtd_conferida ?? item.quantidade ?? 0),
+        0
+    )
 
     return (
         <>
@@ -269,7 +309,53 @@ const InventoryScan = () => {
                 </div>
             )}
 
-            <div className="flex flex-col h-full overflow-hidden rounded">
+            <div className="flex flex-col gap-4 h-full overflow-hidden rounded">
+                <div className="flex flex-col overflow-hidden rounded">
+                    <div className="flex-1 overflow-y-auto">
+                        <Table className="uppercase overflow-visible rounded">
+                            <TableHeader>
+                                <TableRow className="sticky top-0 bg-neutral-200">
+                                    <TableHead className="text-left">horario</TableHead>
+                                    <TableHead className="text-left">cod.</TableHead>
+                                    <TableHead className="text-left">nome</TableHead>
+                                    <TableHead className="text-right">preco</TableHead>
+                                </TableRow>
+                            </TableHeader>
+
+                            <TableBody>
+                                {recentReads.length === 0 ? (
+                                    <TableRow>
+                                        <TableCell colSpan={4} className="text-center">
+                                            Nenhuma leitura recente
+                                        </TableCell>
+                                    </TableRow>
+                                ) : (
+                                    recentReads.map((read, index) => {
+                                        const produto = read.produto
+                                        const codigoProduto = String(produto?.codigo ?? read.id_produto ?? "")
+                                        const rowKey = `${read.id_inventario}-${read.id_produto}-${index}`
+                                        return (
+                                            <TableRow key={rowKey} className="hover:bg-neutral-400/20 duration-200">
+                                                <TableCell className="text-left">
+                                                    {formatDateTime(read.created_at)}
+                                                </TableCell>
+                                                <TableCell className="text-left">{codigoProduto}</TableCell>
+                                                <TableCell className="text-left">{produto?.nome ?? "-"}</TableCell>
+                                                <TableCell className="text-right">
+                                                    {new Intl.NumberFormat("pt-BR", {
+                                                        style: "currency",
+                                                        currency: "BRL",
+                                                    }).format(Number(read.preco_unitario ?? 0))}
+                                                </TableCell>
+                                            </TableRow>
+                                        )
+                                    })
+                                )}
+                            </TableBody>
+                        </Table>
+                    </div>
+                </div>
+
                 <div className="flex-1 overflow-y-auto">
                     <Table className="uppercase overflow-visible rounded">
                         <TableHeader>
@@ -303,6 +389,9 @@ const InventoryScan = () => {
                                     const rowKey = `${item.id_inventario}-${item.id_produto}`
                                     const highlight =
                                         highlightId && highlightId === item.id_produto
+                                    const qtdConferida = Number(
+                                        item.qtd_conferida ?? item.quantidade ?? 0
+                                    )
                                     return (
                                         <TableRow
                                             key={rowKey}
@@ -316,7 +405,7 @@ const InventoryScan = () => {
                                             <TableCell className="text-left">{codigoProduto}</TableCell>
                                             <TableCell className="text-left">{codigoBarras}</TableCell>
                                             <TableCell className="text-center">
-                                                {item.quantidade}
+                                                {qtdConferida}
                                             </TableCell>
                                             <TableCell className="text-right">
                                                 {formatDateTime(item.last_read)}

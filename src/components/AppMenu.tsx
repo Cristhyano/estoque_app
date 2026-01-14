@@ -17,28 +17,25 @@ const AppMenu = () => {
     })
 
     return (
-        <nav className="sticky top-0 z-20 bg-white border-b border-neutral-200">
-            <div className="flex flex-row items-center gap-3 px-4 py-2">
-                {menuItems.map((item) => {
-                    const isActive =
-                        item.to === "/"
-                            ? pathname === "/"
-                            : pathname.startsWith(item.to)
-                    return (
-                        <Link
-                            key={item.to}
-                            to={item.to}
-                            className={`px-2 py-1 rounded text-sm font-medium ${
-                                isActive
-                                    ? "bg-neutral-800 text-white"
-                                    : "text-neutral-700 hover:bg-neutral-200"
+        <nav className="flex flex-row items-center gap-4">
+            {menuItems.map((item) => {
+                const isActive =
+                    item.to === "/"
+                        ? pathname === "/"
+                        : pathname.startsWith(item.to)
+                return (
+                    <Link
+                        key={item.to}
+                        to={item.to}
+                        className={`px-2 py-1 rounded text-sm font-medium bg-neutral-200 ${isActive
+                                ? "bg-neutral-800 text-white"
+                                : "text-neutral-700 hover:bg-neutral-300"
                             }`}
-                        >
-                            {item.label}
-                        </Link>
-                    )
-                })}
-            </div>
+                    >
+                        {item.label}
+                    </Link>
+                )
+            })}
         </nav>
     )
 }

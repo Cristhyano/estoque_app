@@ -7,7 +7,7 @@ import InventoryDetail from "./pages/InventoryDetail"
 
 const rootRoute = createRootRoute({
     component: () => (
-        <main className="flex flex-col gap-4 min-h-screen p-4 bg-neutral-100 overflow-hidden">
+        <main className="flex flex-col gap-4 h-screen p-4 bg-neutral-100 ">
             <AppMenu />
             <Outlet />
         </main>
