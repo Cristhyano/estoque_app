@@ -45,6 +45,25 @@ function ensureOpenInventory(periods) {
   return { inventory: createdInventory, created: true };
 }
 
+function resolveInventory(periods, inventoryId) {
+  if (!inventoryId) return null;
+  return periods.find((item) => item.id === inventoryId) || null;
+}
+
+function ensureInventoryForRead(periods, inventoryId) {
+  if (inventoryId) {
+    const inventory = resolveInventory(periods, inventoryId);
+    if (!inventory) {
+      return { error: "Inventario nao encontrado" };
+    }
+    if (inventory.status !== "aberto") {
+      return { error: "Inventario fechado" };
+    }
+    return { inventory, created: false };
+  }
+  return ensureOpenInventory(periods);
+}
+
 function listProdutoInventario(req, res) {
   const items = readProductInventory();
   const products = readProducts();
@@ -66,7 +85,12 @@ function listOpenProdutoInventario(req, res) {
   const products = readProducts();
   const config = readConfig();
   const periods = readInventoryPeriods();
-  const { inventory, created } = ensureOpenInventory(periods);
+  const inventoryId = String(req.query.inventario_id ?? req.query.inventarioId ?? "").trim();
+  const resolved = ensureInventoryForRead(periods, inventoryId);
+  if (resolved.error) {
+    return res.status(404).json({ error: resolved.error });
+  }
+  const { inventory, created } = resolved;
   if (created) {
     writeInventoryPeriods(periods);
   }
@@ -104,7 +128,12 @@ function createProdutoInventario(req, res) {
   const config = readConfig();
 
   const periods = readInventoryPeriods();
-  const { inventory, created } = ensureOpenInventory(periods);
+  const inventoryId = String(req.body.inventarioId ?? req.body.inventario_id ?? "").trim();
+  const resolved = ensureInventoryForRead(periods, inventoryId);
+  if (resolved.error) {
+    return res.status(404).json({ error: resolved.error });
+  }
+  const { inventory, created } = resolved;
   if (created) {
     writeInventoryPeriods(periods);
   }

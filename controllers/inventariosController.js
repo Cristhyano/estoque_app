@@ -298,6 +298,14 @@ async function importInventarioXlsx(req, res) {
     ? periods.find((item) => item.id === inventoryIdRaw)
     : null;
 
+  if (inventoryIdRaw && !inventory) {
+    return res.status(404).json({ error: "Inventario nao encontrado" });
+  }
+
+  if (inventory && inventory.status !== "aberto") {
+    return res.status(400).json({ error: "Inventario fechado" });
+  }
+
   if (!inventory) {
     const now = new Date().toISOString();
     inventory = {
