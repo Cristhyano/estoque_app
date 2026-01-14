@@ -380,11 +380,11 @@ const InventoryScan = () => {
                     autoFocus
                     value={code}
                     onChange={(event) => setCode(event.target.value)}
-                    onBlur={() => {
-                        if (!mutation.isPending) {
-                            window.setTimeout(() => inputRef.current?.focus(), 0)
-                        }
-                    }}
+                    // onBlur={() => {
+                    //     if (!mutation.isPending) {
+                    //         window.setTimeout(() => inputRef.current?.focus(), 0)
+                    //     }
+                    // }}
                     disabled={mutation.isPending || closeMutation.isPending}
                 />
             </form>

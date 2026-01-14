@@ -57,6 +57,11 @@ const InventoryList = () => {
     } | null>(null)
     const [importInputKey, setImportInputKey] = useState(0)
     const [isDialogOpen, setIsDialogOpen] = useState(false)
+    const [isMergeOpen, setIsMergeOpen] = useState(false)
+    const [mergeFromId, setMergeFromId] = useState("")
+    const [mergeToId, setMergeToId] = useState("")
+    const [mergeStatus, setMergeStatus] = useState<string | null>(null)
+    const [isMerging, setIsMerging] = useState(false)
     const [selectedImportInventoryId, setSelectedImportInventoryId] = useState("")
 
     const { data: openInventories } = useQuery<InventoryPeriod[]>({
@@ -151,104 +156,220 @@ const InventoryList = () => {
         }
     }
 
+    const handleMerge = async () => {
+        if (isMerging || !mergeFromId || !mergeToId) return
+        if (mergeFromId === mergeToId) {
+            setMergeStatus("Inventarios iguais")
+            return
+        }
+        setIsMerging(true)
+        setMergeStatus(null)
+        try {
+            const response = await fetch("http://localhost:3001/inventarios/merge", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    fromInventarioId: mergeFromId,
+                    toInventarioId: mergeToId,
+                }),
+            })
+            if (!response.ok) {
+                const errorBody = await response.json().catch(() => ({}))
+                const errorMessage = errorBody?.error || "Falha ao mesclar"
+                throw new Error(errorMessage)
+            }
+            await queryClient.invalidateQueries({ queryKey: ["inventarios"] })
+            setMergeStatus("Mesclagem concluida")
+            setMergeFromId("")
+            setMergeToId("")
+        } catch (error) {
+            console.error(error)
+            setMergeStatus(error instanceof Error ? error.message : "Erro na mesclagem")
+        } finally {
+            setIsMerging(false)
+        }
+    }
+
     return (
         <>
             <header className="flex flex-row justify-between">
                 <h1 className="text-2xl font-semibold">Inventarios</h1>
-                <Dialog.Root open={isDialogOpen} onOpenChange={handleDialogOpenChange}>
-                    <Dialog.Trigger asChild>
-                        <button
-                            type="button"
-                            className="bg-neutral-800 px-2 rounded text-white flex flex-row items-center gap-2 cursor-pointer"
-                        >
-                            Importar inventario
-                        </button>
-                    </Dialog.Trigger>
-                    <Dialog.Portal>
-                        <Dialog.Overlay className="fixed inset-0 bg-black/40" />
-                        <Dialog.Content
-                            className="fixed left-1/2 top-1/2 w-[90vw] max-w-md -translate-x-1/2 -translate-y-1/2 rounded bg-white p-4 shadow-lg"
-                            onInteractOutside={(event) => {
-                                if (isImporting) event.preventDefault()
-                            }}
-                            onEscapeKeyDown={(event) => {
-                                if (isImporting) event.preventDefault()
-                            }}
-                        >
-                            <Dialog.Title className="text-lg font-semibold">Importar inventario</Dialog.Title>
-                            <Dialog.Description className="text-sm text-neutral-600">
-                                Selecione o arquivo XLSX exportado pelo sistema.
-                            </Dialog.Description>
-                            <div className="mt-4 flex flex-col gap-3">
-                                <label className="flex flex-col gap-1 text-sm font-medium">
-                                    Arquivo
-                                    <input
-                                        key={importInputKey}
-                                        className="bg-neutral-200 px-2 py-1 rounded"
-                                        type="file"
-                                        accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                                        onChange={(event) => setImportFile(event.target.files?.[0] ?? null)}
-                                    />
-                                </label>
-                                <label className="flex flex-col gap-1 text-sm font-medium">
-                                    Inventario destino (opcional)
-                                    <select
-                                        className="bg-neutral-200 px-2 py-1 rounded"
-                                        value={selectedImportInventoryId}
-                                        onChange={(event) => setSelectedImportInventoryId(event.target.value)}
-                                    >
-                                        <option value="">Criar novo inventario</option>
-                                        {(openInventories ?? []).map((inventario) => (
-                                            <option key={inventario.id} value={inventario.id}>
-                                                {inventario.nome ?? "Inventario sem nome"} - {inventario.id}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </label>
-                                {importStatus && (
-                                    <span className="text-sm text-neutral-700">{importStatus}</span>
-                                )}
-                                {importResult && (
-                                    <div className="text-sm text-neutral-700">
-                                        Produtos: {importResult.total_produtos}, Leituras: {importResult.total_leituras}
-                                    </div>
-                                )}
-                                {importResult?.errors && importResult.errors.length > 0 && (
-                                    <div className="text-xs text-red-600">
-                                        {importResult.errors.slice(0, 3).map((item, index) => (
-                                            <div key={`${item.codigo ?? "linha"}-${index}`}>
-                                                {item.linha ? `Linha ${item.linha}: ` : ""}{item.codigo ?? ""} {item.erro}
-                                            </div>
-                                        ))}
-                                        {importResult.errors.length > 3 && (
-                                            <div>+{importResult.errors.length - 3} erros</div>
-                                        )}
-                                    </div>
-                                )}
-                            </div>
-                            <div className="mt-4 flex justify-end gap-2">
-                                <Dialog.Close asChild>
+                <div className="flex items-center gap-2">
+                    <Dialog.Root open={isDialogOpen} onOpenChange={handleDialogOpenChange}>
+                        <Dialog.Trigger asChild>
+                            <button
+                                type="button"
+                                className="bg-neutral-800 px-2 rounded text-white flex flex-row items-center gap-2 cursor-pointer"
+                            >
+                                Importar inventario
+                            </button>
+                        </Dialog.Trigger>
+                        <Dialog.Portal>
+                            <Dialog.Overlay className="fixed inset-0 bg-black/40" />
+                            <Dialog.Content
+                                className="fixed left-1/2 top-1/2 w-[90vw] max-w-md -translate-x-1/2 -translate-y-1/2 rounded bg-white p-4 shadow-lg"
+                                onInteractOutside={(event) => {
+                                    if (isImporting) event.preventDefault()
+                                }}
+                                onEscapeKeyDown={(event) => {
+                                    if (isImporting) event.preventDefault()
+                                }}
+                            >
+                                <Dialog.Title className="text-lg font-semibold">Importar inventario</Dialog.Title>
+                                <Dialog.Description className="text-sm text-neutral-600">
+                                    Selecione o arquivo XLSX exportado pelo sistema.
+                                </Dialog.Description>
+                                <div className="mt-4 flex flex-col gap-3">
+                                    <label className="flex flex-col gap-1 text-sm font-medium">
+                                        Arquivo
+                                        <input
+                                            key={importInputKey}
+                                            className="bg-neutral-200 px-2 py-1 rounded"
+                                            type="file"
+                                            accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                                            onChange={(event) => setImportFile(event.target.files?.[0] ?? null)}
+                                        />
+                                    </label>
+                                    <label className="flex flex-col gap-1 text-sm font-medium">
+                                        Inventario destino (opcional)
+                                        <select
+                                            className="bg-neutral-200 px-2 py-1 rounded"
+                                            value={selectedImportInventoryId}
+                                            onChange={(event) => setSelectedImportInventoryId(event.target.value)}
+                                        >
+                                            <option value="">Criar novo inventario</option>
+                                            {(openInventories ?? []).map((inventario) => (
+                                                <option key={inventario.id} value={inventario.id}>
+                                                    {inventario.nome ?? "Inventario sem nome"} - {inventario.id}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </label>
+                                    {importStatus && (
+                                        <span className="text-sm text-neutral-700">{importStatus}</span>
+                                    )}
+                                    {importResult && (
+                                        <div className="text-sm text-neutral-700">
+                                            Produtos: {importResult.total_produtos}, Leituras: {importResult.total_leituras}
+                                        </div>
+                                    )}
+                                    {importResult?.errors && importResult.errors.length > 0 && (
+                                        <div className="text-xs text-red-600">
+                                            {importResult.errors.slice(0, 3).map((item, index) => (
+                                                <div key={`${item.codigo ?? "linha"}-${index}`}>
+                                                    {item.linha ? `Linha ${item.linha}: ` : ""}{item.codigo ?? ""} {item.erro}
+                                                </div>
+                                            ))}
+                                            {importResult.errors.length > 3 && (
+                                                <div>+{importResult.errors.length - 3} erros</div>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="mt-4 flex justify-end gap-2">
+                                    <Dialog.Close asChild>
+                                        <button
+                                            type="button"
+                                            className="bg-neutral-200 px-3 py-1 rounded"
+                                            disabled={isImporting}
+                                        >
+                                            Cancelar
+                                        </button>
+                                    </Dialog.Close>
                                     <button
                                         type="button"
-                                        className="bg-neutral-200 px-3 py-1 rounded"
-                                        disabled={isImporting}
+                                        className="bg-neutral-800 px-3 py-1 rounded text-white"
+                                        onClick={handleImport}
+                                        disabled={isImporting || !importFile}
+                                        aria-busy={isImporting}
                                     >
-                                        Cancelar
+                                        {isImporting ? "Importando" : "Confirmar"}
                                     </button>
-                                </Dialog.Close>
-                                <button
-                                    type="button"
-                                    className="bg-neutral-800 px-3 py-1 rounded text-white"
-                                    onClick={handleImport}
-                                    disabled={isImporting || !importFile}
-                                    aria-busy={isImporting}
-                                >
-                                    {isImporting ? "Importando" : "Confirmar"}
-                                </button>
-                            </div>
-                        </Dialog.Content>
-                    </Dialog.Portal>
-                </Dialog.Root>
+                                </div>
+                            </Dialog.Content>
+                        </Dialog.Portal>
+                    </Dialog.Root>
+
+                    <Dialog.Root open={isMergeOpen} onOpenChange={setIsMergeOpen}>
+                        <Dialog.Trigger asChild>
+                            <button
+                                type="button"
+                                className="bg-neutral-200 px-2 rounded text-neutral-800 flex flex-row items-center gap-2 cursor-pointer"
+                            >
+                                Mesclar inventarios
+                            </button>
+                        </Dialog.Trigger>
+                        <Dialog.Portal>
+                            <Dialog.Overlay className="fixed inset-0 bg-black/40" />
+                            <Dialog.Content className="fixed left-1/2 top-1/2 w-[90vw] max-w-md -translate-x-1/2 -translate-y-1/2 rounded bg-white p-4 shadow-lg">
+                                <Dialog.Title className="text-lg font-semibold">Mesclar inventarios</Dialog.Title>
+                                <Dialog.Description className="text-sm text-neutral-600">
+                                    Mova leituras de um inventario aberto para outro.
+                                </Dialog.Description>
+                                <div className="mt-4 flex flex-col gap-3">
+                                    <label className="flex flex-col gap-1 text-sm font-medium">
+                                        Origem
+                                        <select
+                                            className="bg-neutral-200 px-2 py-1 rounded"
+                                            value={mergeFromId}
+                                            onChange={(event) => setMergeFromId(event.target.value)}
+                                        >
+                                            <option value="">Selecione</option>
+                                            {(openInventories ?? []).map((inventario) => (
+                                                <option key={inventario.id} value={inventario.id}>
+                                                    {inventario.nome ?? "Inventario sem nome"} - {inventario.id}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </label>
+                                    <label className="flex flex-col gap-1 text-sm font-medium">
+                                        Destino
+                                        <select
+                                            className="bg-neutral-200 px-2 py-1 rounded"
+                                            value={mergeToId}
+                                            onChange={(event) => setMergeToId(event.target.value)}
+                                        >
+                                            <option value="">Selecione</option>
+                                            {(openInventories ?? []).map((inventario) => (
+                                                <option key={inventario.id} value={inventario.id}>
+                                                    {inventario.nome ?? "Inventario sem nome"} - {inventario.id}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </label>
+                                    {mergeStatus && (
+                                        <span className="text-sm text-neutral-700">{mergeStatus}</span>
+                                    )}
+                                </div>
+                                <div className="mt-4 flex justify-end gap-2">
+                                    <Dialog.Close asChild>
+                                        <button
+                                            type="button"
+                                            className="bg-neutral-200 px-3 py-1 rounded"
+                                            disabled={isMerging}
+                                        >
+                                            Cancelar
+                                        </button>
+                                    </Dialog.Close>
+                                    <button
+                                        type="button"
+                                        className="bg-neutral-800 px-3 py-1 rounded text-white"
+                                        onClick={() => {
+                                            if (!window.confirm("Mesclar inventarios?")) return
+                                            handleMerge()
+                                        }}
+                                        disabled={isMerging || !mergeFromId || !mergeToId}
+                                        aria-busy={isMerging}
+                                    >
+                                        {isMerging ? "Mesclando" : "Confirmar"}
+                                    </button>
+                                </div>
+                            </Dialog.Content>
+                        </Dialog.Portal>
+                    </Dialog.Root>
+                </div>
             </header>
 
             <Divider />
