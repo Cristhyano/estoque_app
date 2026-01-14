@@ -111,8 +111,9 @@ const InventoryScan = () => {
     const [removeQuantities, setRemoveQuantities] = useState<Record<string, string>>({})
     const [selectedInventoryId, setSelectedInventoryId] = useState("")
 
+    const inventoryQueryKey = ["produto-inventario-open", selectedInventoryId]
     const { data, isPending, isFetching, error } = useQuery<ProdutoInventarioOpenResponse>({
-        queryKey: ["produto-inventario-open", selectedInventoryId],
+        queryKey: inventoryQueryKey,
         queryFn: async () => {
             const query = selectedInventoryId ? `?inventario_id=${selectedInventoryId}` : ""
             const response = await fetch(`http://localhost:3001/produto-inventario/aberto${query}`)
@@ -186,8 +187,9 @@ const InventoryScan = () => {
                 setHighlightId(null)
             }, 800)
             playBeep("success")
+            const targetKey = ["produto-inventario-open", payload.inventario.id]
             queryClient.setQueryData<ProdutoInventarioOpenResponse | undefined>(
-                ["produto-inventario-open"],
+                targetKey,
                 (current) => {
                     if (!current) return current
                     const nextItems = [...current.items]
@@ -250,7 +252,10 @@ const InventoryScan = () => {
             return (await response.json()) as ProdutoInventarioOpenResponse
         },
         onSuccess: (payload) => {
-            queryClient.setQueryData(["produto-inventario-open"], payload)
+            queryClient.setQueryData(
+                ["produto-inventario-open", payload.inventario.id],
+                payload
+            )
         },
         onError: (err: Error) => {
             setMessage({ type: "error", text: err.message })
