@@ -4,12 +4,34 @@ const {
   writeInventoryPeriods,
   readProductInventory,
   writeProductInventory,
+  readConfig,
 } = require("../utils/storage");
 const {
   createOpenInventory,
   getOpenInventory,
 } = require("../utils/inventory");
 const { buildListResponse } = require("../utils/pagination");
+
+function buildInventorySnapshot(product, quantidade, config) {
+  const qtdSistema = Number(product?.quantidade ?? 0);
+  const precoUnitarioRaw = Number(product?.preco_unitario);
+  const fator = Number(config?.fator_conversao) || 1;
+  const precoUnitario = Number.isFinite(precoUnitarioRaw)
+    ? precoUnitarioRaw / fator
+    : 0;
+  const qtdConferida = Number(quantidade ?? 0);
+  const valorSistema = qtdSistema * precoUnitario;
+  const valorConferido = qtdConferida * precoUnitario;
+  return {
+    qtd_sistema: qtdSistema,
+    qtd_conferida: qtdConferida,
+    ajuste: qtdConferida - qtdSistema,
+    preco_unitario: precoUnitario,
+    valor_sistema: valorSistema,
+    valor_conferido: valorConferido,
+    diferenca_valor: valorConferido - valorSistema,
+  };
+}
 
 function parseCodeInput(body) {
   const codigo = String(body.codigo ?? body.code ?? "").trim();
@@ -85,6 +107,7 @@ function createProdutoInventario(req, res) {
   if (!product) {
     return res.status(404).json({ error: "Produto nao encontrado" });
   }
+  const config = readConfig();
 
   const periods = readInventoryPeriods();
   const { inventory, created } = ensureOpenInventory(periods);
@@ -101,16 +124,20 @@ function createProdutoInventario(req, res) {
   const now = new Date().toISOString();
 
   if (index >= 0) {
+    const nextQuantidade = Number(items[index].quantidade ?? 0) + 1;
     items[index] = {
       ...items[index],
-      quantidade: Number(items[index].quantidade ?? 0) + 1,
+      quantidade: nextQuantidade,
+      ...buildInventorySnapshot(product, nextQuantidade, config),
       last_read: now,
     };
   } else {
+    const quantidade = 1;
     items.push({
       id_produto: productId,
       id_inventario: inventory.id,
-      quantidade: 1,
+      quantidade,
+      ...buildInventorySnapshot(product, quantidade, config),
       last_read: now,
     });
   }
@@ -140,6 +167,7 @@ function updateProdutoInventario(req, res) {
   if (!product) {
     return res.status(404).json({ error: "Produto nao encontrado" });
   }
+  const config = readConfig();
 
   const periods = readInventoryPeriods();
   const open = getOpenInventory(periods);
@@ -156,12 +184,17 @@ function updateProdutoInventario(req, res) {
   );
 
   if (index >= 0) {
-    items[index] = { ...items[index], quantidade };
+    items[index] = {
+      ...items[index],
+      quantidade,
+      ...buildInventorySnapshot(product, quantidade, config),
+    };
   } else {
     items.push({
       id_produto: productId,
       id_inventario: inventoryId,
       quantidade,
+      ...buildInventorySnapshot(product, quantidade, config),
     });
   }
 

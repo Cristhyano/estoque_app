@@ -6,6 +6,7 @@ const {
   updateInventario,
   deleteInventario,
   closeOpenInventario,
+  exportInventario,
 } = require("../controllers/inventariosController");
 
 const router = express.Router();
@@ -71,6 +72,7 @@ router.get("/", listInventarios);
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
+router.get("/:id/export", exportInventario);
 router.get("/:id", getInventario);
 /**
  * @swagger
