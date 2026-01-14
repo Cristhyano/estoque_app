@@ -3,6 +3,7 @@ const {
   writeInventoryPeriods,
   readProducts,
   readProductInventory,
+  writeProductInventory,
   readConfig,
 } = require("../utils/storage");
 const { parseInventoryPeriodInput, buildNextInventoryId } = require("../utils/inventory");
