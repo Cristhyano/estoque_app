@@ -8,8 +8,38 @@ const {
 const { parseInventoryPeriodInput, buildNextInventoryId } = require("../utils/inventory");
 const { buildListResponse } = require("../utils/pagination");
 const ExcelJS = require("exceljs");
-const { aggregateInventoryItems } = require("../utils/inventoryAggregation");
+const { aggregateInventoryItems, buildReadEvent } = require("../utils/inventoryAggregation");
 const MAX_INVENTORY_NAME = 100;
+
+function normalizeHeader(value) {
+  return String(value ?? "")
+    .trim()
+    .toUpperCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+}
+
+function parseIntegerValue(value) {
+  if (typeof value === "number") {
+    if (!Number.isFinite(value)) return null;
+    return Math.floor(value);
+  }
+  const normalized = String(value ?? "")
+    .trim()
+    .replace(/\./g, "")
+    .replace(",", ".");
+  if (!normalized) return null;
+  const parsed = Number(normalized);
+  if (!Number.isFinite(parsed)) return null;
+  return Math.floor(parsed);
+}
+
+function buildImportInventoryName() {
+  const now = new Date();
+  const date = now.toISOString().slice(0, 10);
+  const time = now.toISOString().slice(11, 16);
+  return `Inventario importado - ${date} ${time}`;
+}
 
 function listInventarios(req, res) {
   const periods = readInventoryPeriods();
@@ -177,6 +207,164 @@ function updateInventarioNome(req, res) {
   res.json(updated);
 }
 
+async function importInventarioXlsx(req, res) {
+  if (!req.file) {
+    return res.status(400).json({ error: "Arquivo nao informado" });
+  }
+
+  const workbook = new ExcelJS.Workbook();
+  try {
+    await workbook.xlsx.load(req.file.buffer);
+  } catch (error) {
+    return res.status(400).json({ error: "Arquivo invalido" });
+  }
+
+  const worksheet = workbook.worksheets[0];
+  if (!worksheet) {
+    return res.status(400).json({ error: "Planilha nao encontrada" });
+  }
+
+  let headerRowIndex = null;
+  let headerMap = {};
+  const maxScanRows = Math.min(worksheet.rowCount, 15);
+  for (let rowIndex = 1; rowIndex <= maxScanRows; rowIndex += 1) {
+    const row = worksheet.getRow(rowIndex);
+    const values = row.values ?? [];
+    const headers = values.map((cell) => normalizeHeader(cell));
+    const codigoIndex = headers.findIndex((value) => value === "COD");
+    const qtdIndex = headers.findIndex(
+      (value) => value === "QTD CONFERIDA"
+    );
+    if (codigoIndex > -1 && qtdIndex > -1) {
+      headerRowIndex = rowIndex;
+      headerMap = {
+        codigo: codigoIndex,
+        descricao: headers.findIndex((value) => value === "DESCRICAO"),
+        preco: headers.findIndex((value) => value === "PRECO UNITARIO"),
+        qtdSistema: headers.findIndex((value) => value === "QTD SISTEMA"),
+        qtdConferida: qtdIndex,
+      };
+      break;
+    }
+  }
+
+  if (!headerRowIndex) {
+    return res.status(400).json({ error: "Cabecalho invalido" });
+  }
+
+  const errors = [];
+  const quantitiesByCode = new Map();
+  const lastRow = worksheet.rowCount;
+  for (let rowIndex = headerRowIndex + 1; rowIndex <= lastRow; rowIndex += 1) {
+    const row = worksheet.getRow(rowIndex);
+    if (!row || row.cellCount === 0) continue;
+
+    const codigoRaw = row.getCell(headerMap.codigo + 1).value;
+    const codigo = String(codigoRaw ?? "").trim();
+    if (!codigo) {
+      continue;
+    }
+
+    const qtdRaw = row.getCell(headerMap.qtdConferida + 1).value;
+    const qtdConferida = parseIntegerValue(qtdRaw);
+    if (qtdConferida === null || qtdConferida < 0) {
+      errors.push({ linha: rowIndex, codigo, erro: "Qtd conferida invalida" });
+      continue;
+    }
+    if (qtdConferida === 0) {
+      continue;
+    }
+
+    const current = quantitiesByCode.get(codigo) ?? 0;
+    quantitiesByCode.set(codigo, current + qtdConferida);
+  }
+
+  if (quantitiesByCode.size === 0) {
+    return res.status(400).json({
+      error: "Nenhuma leitura valida encontrada",
+      errors,
+    });
+  }
+
+  const periods = readInventoryPeriods();
+  const inventoryIdRaw = String(
+    req.body?.inventario_id ?? req.body?.inventarioId ?? ""
+  ).trim();
+  let inventory = inventoryIdRaw
+    ? periods.find((item) => item.id === inventoryIdRaw)
+    : null;
+
+  if (!inventory) {
+    const now = new Date().toISOString();
+    inventory = {
+      id: buildNextInventoryId(periods),
+      nome: buildImportInventoryName(),
+      inicio: now,
+      fim: null,
+      status: "aberto",
+    };
+    periods.push(inventory);
+    writeInventoryPeriods(periods);
+  }
+
+  const products = readProducts();
+  const config = readConfig();
+  const existingReads = readProductInventory();
+  const readsToInsert = [];
+  const errorsByProduct = [];
+  let totalProdutos = 0;
+  let totalLeituras = 0;
+  let sequence = 0;
+  const baseTime = Date.now();
+
+  quantitiesByCode.forEach((qtdConferida, codigo) => {
+    const product =
+      products.find((item) => item.codigo === codigo) ||
+      products.find((item) => item.codigo_barras === codigo) ||
+      null;
+    if (!product) {
+      errorsByProduct.push({ codigo, erro: "Produto nao encontrado" });
+      return;
+    }
+
+    totalProdutos += 1;
+    totalLeituras += qtdConferida;
+    for (let i = 0; i < qtdConferida; i += 1) {
+      const readEvent = buildReadEvent({
+        product,
+        inventoryId: inventory.id,
+        config,
+      });
+      const timestamp = new Date(baseTime + sequence * 1000).toISOString();
+      sequence += 1;
+      readsToInsert.push({
+        ...readEvent,
+        created_at: timestamp,
+        last_read: timestamp,
+        id: `import_${Date.now()}_${sequence}_${Math.floor(Math.random() * 1000000)}`,
+      });
+    }
+  });
+
+  const allErrors = [...errors, ...errorsByProduct];
+
+  if (readsToInsert.length === 0) {
+    return res.status(400).json({
+      error: "Nenhuma leitura valida encontrada",
+      errors: allErrors,
+    });
+  }
+
+  writeProductInventory([...existingReads, ...readsToInsert]);
+
+  res.json({
+    inventario: inventory,
+    total_produtos: totalProdutos,
+    total_leituras: totalLeituras,
+    errors: allErrors,
+  });
+}
+
 function deleteInventario(req, res) {
   const periods = readInventoryPeriods();
   const index = periods.findIndex((item) => item.id === req.params.id);
@@ -301,6 +489,7 @@ module.exports = {
   createInventario,
   updateInventario,
   updateInventarioNome,
+  importInventarioXlsx,
   deleteInventario,
   closeOpenInventario,
   exportInventario,

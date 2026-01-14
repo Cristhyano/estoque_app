@@ -5,10 +5,17 @@ const {
   createInventario,
   updateInventario,
   updateInventarioNome,
+  importInventarioXlsx,
   deleteInventario,
   closeOpenInventario,
   exportInventario,
 } = require("../controllers/inventariosController");
+const multer = require("multer");
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 20 * 1024 * 1024 },
+});
 
 const router = express.Router();
 
@@ -75,6 +82,7 @@ router.get("/", listInventarios);
  */
 router.get("/:id/export", exportInventario);
 router.get("/:id", getInventario);
+router.post("/import", upload.single("file"), importInventarioXlsx);
 /**
  * @swagger
  * /inventarios/aberto/fechar:

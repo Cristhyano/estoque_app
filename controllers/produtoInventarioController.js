@@ -84,7 +84,7 @@ function listOpenProdutoInventario(req, res) {
     products,
     config,
     inventoryId: inventory.id,
-    limit: 5,
+    limit: 10,
   });
 
   res.json({ inventario: inventory, items, recent_reads });
