@@ -104,6 +104,7 @@ const InventoryScan = () => {
     const lastReadRef = useRef<{ code: string; at: number }>({ code: "", at: 0 })
     const highlightTimeoutRef = useRef<number | null>(null)
     const audioRef = useRef<AudioContext | null>(null)
+    const wasFetchingRef = useRef(false)
     const [code, setCode] = useState("")
     const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
     const [highlightId, setHighlightId] = useState<string | null>(null)
@@ -305,6 +306,13 @@ const InventoryScan = () => {
             inputRef.current?.focus()
         }
     }, [mutation.isPending])
+
+    useEffect(() => {
+        if (wasFetchingRef.current && !isFetching) {
+            inputRef.current?.focus()
+        }
+        wasFetchingRef.current = isFetching
+    }, [isFetching])
 
     const handleSubmit = (event: FormEvent) => {
         event.preventDefault()
