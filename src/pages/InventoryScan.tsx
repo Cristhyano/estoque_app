@@ -299,11 +299,10 @@ const InventoryScan = () => {
 
             {message && (
                 <div
-                    className={`text-sm ${
-                        message.type === "success"
-                            ? "text-green-700"
-                            : "text-red-600"
-                    }`}
+                    className={`text-sm ${message.type === "success"
+                        ? "text-green-700"
+                        : "text-red-600"
+                        }`}
                 >
                     {message.text}
                 </div>
@@ -315,10 +314,10 @@ const InventoryScan = () => {
                         <Table className="uppercase overflow-visible rounded">
                             <TableHeader>
                                 <TableRow className="sticky top-0 bg-neutral-200">
-                                    <TableHead className="text-left">horario</TableHead>
                                     <TableHead className="text-left">cod.</TableHead>
                                     <TableHead className="text-left">nome</TableHead>
                                     <TableHead className="text-right">preco</TableHead>
+                                    <TableHead className="text-left">horario</TableHead>
                                 </TableRow>
                             </TableHeader>
 
@@ -336,9 +335,6 @@ const InventoryScan = () => {
                                         const rowKey = `${read.id_inventario}-${read.id_produto}-${index}`
                                         return (
                                             <TableRow key={rowKey} className="hover:bg-neutral-400/20 duration-200">
-                                                <TableCell className="text-left">
-                                                    {formatDateTime(read.created_at)}
-                                                </TableCell>
                                                 <TableCell className="text-left">{codigoProduto}</TableCell>
                                                 <TableCell className="text-left">{produto?.nome ?? "-"}</TableCell>
                                                 <TableCell className="text-right">
@@ -346,6 +342,9 @@ const InventoryScan = () => {
                                                         style: "currency",
                                                         currency: "BRL",
                                                     }).format(Number(read.preco_unitario ?? 0))}
+                                                </TableCell>
+                                                <TableCell className="text-left">
+                                                    {formatDateTime(read.created_at)}
                                                 </TableCell>
                                             </TableRow>
                                         )
@@ -356,95 +355,96 @@ const InventoryScan = () => {
                     </div>
                 </div>
 
-                <div className="flex-1 overflow-y-auto">
-                    <Table className="uppercase overflow-visible rounded">
-                        <TableHeader>
-                            <TableRow className="sticky top-0 bg-neutral-200">
-                                <TableHead className="text-left">nome</TableHead>
-                                <TableHead className="text-left">cod.</TableHead>
-                                <TableHead className="text-left">cod. barras</TableHead>
-                                <TableHead className="text-center">qtd.</TableHead>
-                                <TableHead className="text-right">ultima leitura</TableHead>
-                            </TableRow>
-                        </TableHeader>
-
-                        <TableBody>
-                            {isPending ? (
-                                <TableRow>
-                                    <TableCell colSpan={5} className="text-center">
-                                        Carregando
-                                    </TableCell>
+                <div className="flex flex-col overflow-hidden rounded">
+                    <div className="flex-1 overflow-y-auto">
+                        <Table className="uppercase overflow-visible rounded">
+                            <TableHeader>
+                                <TableRow className="sticky top-0 bg-neutral-200">
+                                    <TableHead className="text-left">cod.</TableHead>
+                                    {/* <TableHead className="text-left">cod. barras</TableHead> */}
+                                    <TableHead className="text-left">nome</TableHead>
+                                    <TableHead className="text-center">qtd.</TableHead>
+                                    <TableHead className="text-right">ultima leitura</TableHead>
                                 </TableRow>
-                            ) : items.length === 0 ? (
-                                <TableRow>
-                                    <TableCell colSpan={5} className="text-center">
-                                        Nenhuma leitura ainda
-                                    </TableCell>
-                                </TableRow>
-                            ) : (
-                                items.map((item) => {
-                                    const produto = item.produto
-                                    const codigoProduto = String(produto?.codigo ?? "")
-                                    const codigoBarras = String(produto?.codigo_barras ?? "")
-                                    const rowKey = `${item.id_inventario}-${item.id_produto}`
-                                    const highlight =
-                                        highlightId && highlightId === item.id_produto
-                                    const qtdConferida = Number(
-                                        item.qtd_conferida ?? item.quantidade ?? 0
-                                    )
-                                    return (
-                                        <TableRow
-                                            key={rowKey}
-                                            className={`hover:bg-neutral-400/20 duration-200 ${
-                                                highlight ? "bg-orange-200/50" : ""
-                                            }`}
-                                        >
-                                            <TableCell className="text-left">
-                                                {produto?.nome ?? "-"}
-                                            </TableCell>
-                                            <TableCell className="text-left">{codigoProduto}</TableCell>
-                                            <TableCell className="text-left">{codigoBarras}</TableCell>
-                                            <TableCell className="text-center">
-                                                {qtdConferida}
-                                            </TableCell>
-                                            <TableCell className="text-right">
-                                                {formatDateTime(item.last_read)}
-                                            </TableCell>
-                                        </TableRow>
-                                    )
-                                })
-                            )}
-                        </TableBody>
+                            </TableHeader>
 
-                        <TableFooter>
-                            <TableRow className="sticky bottom-0 bg-neutral-200">
-                                <TableCell className="text-left">
-                                    {data?.inventario?.nome ?? "Inventario aberto"}
-                                </TableCell>
-                                <TableCell></TableCell>
-                                <TableCell></TableCell>
-                                <TableCell className="text-center">{totalQuantidade}</TableCell>
-                                <TableCell className="text-right"></TableCell>
-                            </TableRow>
-                        </TableFooter>
-                    </Table>
+                            <TableBody>
+                                {isPending ? (
+                                    <TableRow>
+                                        <TableCell colSpan={5} className="text-center">
+                                            Carregando
+                                        </TableCell>
+                                    </TableRow>
+                                ) : items.length === 0 ? (
+                                    <TableRow>
+                                        <TableCell colSpan={5} className="text-center">
+                                            Nenhuma leitura ainda
+                                        </TableCell>
+                                    </TableRow>
+                                ) : (
+                                    items.map((item) => {
+                                        const produto = item.produto
+                                        const codigoProduto = String(produto?.codigo ?? "")
+                                        const codigoBarras = String(produto?.codigo_barras ?? "")
+                                        const rowKey = `${item.id_inventario}-${item.id_produto}`
+                                        const highlight =
+                                            highlightId && highlightId === item.id_produto
+                                        const qtdConferida = Number(
+                                            item.qtd_conferida ?? item.quantidade ?? 0
+                                        )
+                                        return (
+                                            <TableRow
+                                                key={rowKey}
+                                                className={`hover:bg-neutral-400/20 duration-200 ${highlight ? "bg-orange-200/50" : ""
+                                                    }`}
+                                            >
+                                                <TableCell className="text-left">{codigoProduto}</TableCell>
+                                                {/* <TableCell className="text-left">{codigoBarras}</TableCell> */}
+                                                <TableCell className="text-left">
+                                                    {produto?.nome ?? "-"}
+                                                </TableCell>
+                                                <TableCell className="text-center">
+                                                    {qtdConferida}
+                                                </TableCell>
+                                                <TableCell className="text-right">
+                                                    {formatDateTime(item.last_read)}
+                                                </TableCell>
+                                            </TableRow>
+                                        )
+                                    })
+                                )}
+                            </TableBody>
+
+                            <TableFooter>
+                                <TableRow className="sticky bottom-0 bg-neutral-200">
+                                    <TableCell className="text-left">
+                                        {data?.inventario?.nome ?? "Inventario aberto"}
+                                    </TableCell>
+                                    <TableCell></TableCell>
+                                    <TableCell></TableCell>
+                                    <TableCell className="text-center">{totalQuantidade}</TableCell>
+                                    <TableCell className="text-right"></TableCell>
+                                </TableRow>
+                            </TableFooter>
+                        </Table>
+                    </div>
                 </div>
 
-                <div>
-                    {error ? (
-                        <div className="flex flex-row items-center gap-2 text-red-600">
-                            Falha ao carregar leituras
-                        </div>
-                    ) : isFetching ? (
-                        <div className="flex flex-row items-center gap-2">
-                            Carregando
-                        </div>
-                    ) : (
-                        <div className="flex flex-row items-center gap-2">
-                            {items.length} itens lidos
-                        </div>
-                    )}
-                </div>
+            </div>
+            <div>
+                {error ? (
+                    <div className="flex flex-row items-center gap-2 text-red-600">
+                        Falha ao carregar leituras
+                    </div>
+                ) : isFetching ? (
+                    <div className="flex flex-row items-center gap-2">
+                        Carregando
+                    </div>
+                ) : (
+                    <div className="flex flex-row items-center gap-2">
+                        {items.length} itens lidos
+                    </div>
+                )}
             </div>
         </>
     )
