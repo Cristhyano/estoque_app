@@ -3,41 +3,12 @@ const {
   writeInventoryPeriods,
   readProducts,
   readProductInventory,
-  writeProductInventory,
   readConfig,
 } = require("../utils/storage");
 const { parseInventoryPeriodInput, buildNextInventoryId } = require("../utils/inventory");
 const { buildListResponse } = require("../utils/pagination");
 const ExcelJS = require("exceljs");
-
-function resolveProductById(products, id) {
-  return (
-    products.find((item) => item.codigo === id) ||
-    products.find((item) => item.codigo_barras === id) ||
-    null
-  );
-}
-
-function buildInventorySnapshot(product, quantidade, config) {
-  const qtdSistema = Number(product?.quantidade ?? 0);
-  const precoUnitarioRaw = Number(product?.preco_unitario);
-  const fator = Number(config?.fator_conversao) || 1;
-  const precoUnitario = Number.isFinite(precoUnitarioRaw)
-    ? precoUnitarioRaw / fator
-    : 0;
-  const qtdConferida = Number(quantidade ?? 0);
-  const valorSistema = qtdSistema * precoUnitario;
-  const valorConferido = qtdConferida * precoUnitario;
-  return {
-    qtd_sistema: qtdSistema,
-    qtd_conferida: qtdConferida,
-    ajuste: qtdConferida - qtdSistema,
-    preco_unitario: precoUnitario,
-    valor_sistema: valorSistema,
-    valor_conferido: valorConferido,
-    diferenca_valor: valorConferido - valorSistema,
-  };
-}
+const { aggregateInventoryItems } = require("../utils/inventoryAggregation");
 
 function listInventarios(req, res) {
   const periods = readInventoryPeriods();
@@ -57,7 +28,8 @@ function listInventarios(req, res) {
   const productInventory = readProductInventory();
   const totalsByInventory = productInventory.reduce((acc, item) => {
     const current = acc.get(item.id_inventario) ?? 0;
-    acc.set(item.id_inventario, current + Number(item.quantidade ?? 0));
+    const increment = Number(item.quantidade ?? 1) || 1;
+    acc.set(item.id_inventario, current + increment);
     return acc;
   }, new Map());
 
@@ -199,19 +171,6 @@ function closeOpenInventario(req, res) {
   };
   periods[index] = updated;
   writeInventoryPeriods(periods);
-  const products = readProducts();
-  const config = readConfig();
-  const items = readProductInventory().map((item) => {
-    if (item.id_inventario !== updated.id) return item;
-    const product = resolveProductById(products, item.id_produto);
-    const quantidade = Number(item.quantidade ?? item.qtd_conferida ?? 0);
-    return {
-      ...item,
-      quantidade,
-      ...buildInventorySnapshot(product, quantidade, config),
-    };
-  });
-  writeProductInventory(items);
   res.json(updated);
 }
 
@@ -223,9 +182,17 @@ async function exportInventario(req, res) {
   }
 
   const products = readProducts();
-  const productInventory = readProductInventory()
-    .filter((item) => item.id_inventario === period.id)
-    .filter((item) => Number(item.qtd_conferida ?? item.quantidade ?? 0) > 0);
+  const config = readConfig();
+  const productInventory = readProductInventory().filter(
+    (item) => item.id_inventario === period.id
+  );
+  const aggregated = aggregateInventoryItems({
+    items: productInventory,
+    products,
+    config,
+    inventoryId: period.id,
+    includeProduct: false,
+  }).filter((item) => Number(item.qtd_conferida ?? item.quantidade ?? 0) > 0);
 
   const workbook = new ExcelJS.Workbook();
   const worksheet = workbook.addWorksheet("Inventario");
@@ -245,25 +212,18 @@ async function exportInventario(req, res) {
     products.map((item) => [item.codigo || item.codigo_barras || "", item])
   );
 
-  const rows = productInventory.map((item) => {
+  const rows = aggregated.map((item) => {
     const product = productsById.get(item.id_produto);
-    const qtdSistema = Number(item.qtd_sistema ?? 0);
-    const qtdConferidaNumber = Number(item.qtd_conferida ?? item.quantidade ?? 0);
-    const ajuste = Number(item.ajuste ?? 0);
-    const precoUnitario = Number(item.preco_unitario ?? 0);
-    const valorSistema = Number(item.valor_sistema ?? 0);
-    const valorConferido = Number(item.valor_conferido ?? 0);
-    const diferencaValor = Number(item.diferenca_valor ?? 0);
     return {
       codigo: String(product?.codigo || item.id_produto || ""),
       descricao: product?.nome ?? "",
-      preco_unitario: precoUnitario,
-      qtd_sistema: qtdSistema,
-      qtd_conferida: qtdConferidaNumber,
-      ajuste,
-      valor_sistema: valorSistema,
-      valor_conferido: valorConferido,
-      diferenca: diferencaValor,
+      preco_unitario: Number(item.preco_unitario ?? 0),
+      qtd_sistema: Number(item.qtd_sistema ?? 0),
+      qtd_conferida: Number(item.qtd_conferida ?? item.quantidade ?? 0),
+      ajuste: Number(item.ajuste ?? 0),
+      valor_sistema: Number(item.valor_sistema ?? 0),
+      valor_conferido: Number(item.valor_conferido ?? 0),
+      diferenca: Number(item.diferenca_valor ?? 0),
     };
   });
 

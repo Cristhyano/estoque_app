@@ -11,27 +11,11 @@ const {
   getOpenInventory,
 } = require("../utils/inventory");
 const { buildListResponse } = require("../utils/pagination");
-
-function buildInventorySnapshot(product, quantidade, config) {
-  const qtdSistema = Number(product?.quantidade ?? 0);
-  const precoUnitarioRaw = Number(product?.preco_unitario);
-  const fator = Number(config?.fator_conversao) || 1;
-  const precoUnitario = Number.isFinite(precoUnitarioRaw)
-    ? precoUnitarioRaw / fator
-    : 0;
-  const qtdConferida = Number(quantidade ?? 0);
-  const valorSistema = qtdSistema * precoUnitario;
-  const valorConferido = qtdConferida * precoUnitario;
-  return {
-    qtd_sistema: qtdSistema,
-    qtd_conferida: qtdConferida,
-    ajuste: qtdConferida - qtdSistema,
-    preco_unitario: precoUnitario,
-    valor_sistema: valorSistema,
-    valor_conferido: valorConferido,
-    diferenca_valor: valorConferido - valorSistema,
-  };
-}
+const {
+  aggregateInventoryItems,
+  buildRecentReads,
+  buildReadEvent,
+} = require("../utils/inventoryAggregation");
 
 function parseCodeInput(body) {
   const codigo = String(body.codigo ?? body.code ?? "").trim();
@@ -63,37 +47,47 @@ function ensureOpenInventory(periods) {
 
 function listProdutoInventario(req, res) {
   const items = readProductInventory();
-  const listResponse = buildListResponse(items, req.query, {});
+  const products = readProducts();
+  const config = readConfig();
+  const aggregated = aggregateInventoryItems({
+    items,
+    products,
+    config,
+    includeProduct: false,
+  });
+  const listResponse = buildListResponse(aggregated, req.query, {});
   if (listResponse.response) {
     return res.json(listResponse.response);
   }
   res.json(listResponse.pagedItems);
 }
 
-function resolveProductById(products, id) {
-  return (
-    products.find((item) => item.codigo === id) ||
-    products.find((item) => item.codigo_barras === id) ||
-    null
-  );
-}
-
 function listOpenProdutoInventario(req, res) {
   const products = readProducts();
+  const config = readConfig();
   const periods = readInventoryPeriods();
   const { inventory, created } = ensureOpenInventory(periods);
   if (created) {
     writeInventoryPeriods(periods);
   }
 
-  const items = readProductInventory()
-    .filter((item) => item.id_inventario === inventory.id)
-    .map((item) => ({
-      ...item,
-      produto: resolveProductById(products, item.id_produto),
-    }));
+  const allItems = readProductInventory();
+  const items = aggregateInventoryItems({
+    items: allItems,
+    products,
+    config,
+    inventoryId: inventory.id,
+    includeProduct: true,
+  });
+  const recent_reads = buildRecentReads({
+    items: allItems,
+    products,
+    config,
+    inventoryId: inventory.id,
+    limit: 10,
+  });
 
-  res.json({ inventario: inventory, items });
+  res.json({ inventario: inventory, items, recent_reads });
 }
 
 function createProdutoInventario(req, res) {
@@ -116,90 +110,42 @@ function createProdutoInventario(req, res) {
   }
 
   const items = readProductInventory();
-  const productId = product.codigo || product.codigo_barras;
-  const index = items.findIndex(
-    (item) =>
-      item.id_produto === productId && item.id_inventario === inventory.id
-  );
-  const now = new Date().toISOString();
-
-  if (index >= 0) {
-    const nextQuantidade = Number(items[index].quantidade ?? 0) + 1;
-    items[index] = {
-      ...items[index],
-      quantidade: nextQuantidade,
-      ...buildInventorySnapshot(product, nextQuantidade, config),
-      last_read: now,
-    };
-  } else {
-    const quantidade = 1;
-    items.push({
-      id_produto: productId,
-      id_inventario: inventory.id,
-      quantidade,
-      ...buildInventorySnapshot(product, quantidade, config),
-      last_read: now,
-    });
-  }
+  const readEvent = buildReadEvent({
+    product,
+    inventoryId: inventory.id,
+    config,
+  });
+  items.push(readEvent);
 
   writeProductInventory(items);
+  const aggregated = aggregateInventoryItems({
+    items,
+    products,
+    config,
+    inventoryId: inventory.id,
+    includeProduct: true,
+  });
+  const acumulado = aggregated.find(
+    (item) => item.id_produto === readEvent.id_produto
+  );
+  const recent_reads = buildRecentReads({
+    items,
+    products,
+    config,
+    inventoryId: inventory.id,
+    limit: 10,
+  });
   res.json({
     produto: product,
     inventario: inventory,
-    relacionamento:
-      index >= 0 ? items[index] : items[items.length - 1],
+    leitura: readEvent,
+    acumulado,
+    recent_reads,
   });
 }
 
 function updateProdutoInventario(req, res) {
-  const parsed = parseCodeInput(req.body);
-  if (parsed.error) {
-    return res.status(400).json({ error: "Codigo nao informado" });
-  }
-
-  const quantidade = Number(req.body.quantidade);
-  if (!Number.isInteger(quantidade) || quantidade < 0) {
-    return res.status(400).json({ error: "Quantidade invalida" });
-  }
-
-  const products = readProducts();
-  const product = findProductByCode(products, parsed);
-  if (!product) {
-    return res.status(404).json({ error: "Produto nao encontrado" });
-  }
-  const config = readConfig();
-
-  const periods = readInventoryPeriods();
-  const open = getOpenInventory(periods);
-  const inventoryId = String(req.body.id_inventario ?? open?.id ?? "").trim();
-  if (!inventoryId) {
-    return res.status(404).json({ error: "Inventario nao encontrado" });
-  }
-
-  const items = readProductInventory();
-  const productId = product.codigo || product.codigo_barras;
-  const index = items.findIndex(
-    (item) =>
-      item.id_produto === productId && item.id_inventario === inventoryId
-  );
-
-  if (index >= 0) {
-    items[index] = {
-      ...items[index],
-      quantidade,
-      ...buildInventorySnapshot(product, quantidade, config),
-    };
-  } else {
-    items.push({
-      id_produto: productId,
-      id_inventario: inventoryId,
-      quantidade,
-      ...buildInventorySnapshot(product, quantidade, config),
-    });
-  }
-
-  writeProductInventory(items);
-  res.json(items[index >= 0 ? index : items.length - 1]);
+  res.status(400).json({ error: "Operacao nao suportada" });
 }
 
 function deleteProdutoInventario(req, res) {
@@ -223,18 +169,20 @@ function deleteProdutoInventario(req, res) {
 
   const items = readProductInventory();
   const productId = product.codigo || product.codigo_barras;
-  const index = items.findIndex(
+  const remaining = items.filter(
     (item) =>
-      item.id_produto === productId && item.id_inventario === inventoryId
+      !(
+        item.id_produto === productId && item.id_inventario === inventoryId
+      )
   );
+  const removedCount = items.length - remaining.length;
 
-  if (index === -1) {
+  if (removedCount === 0) {
     return res.status(404).json({ error: "Registro nao encontrado" });
   }
 
-  const removed = items.splice(index, 1)[0];
-  writeProductInventory(items);
-  res.json(removed);
+  writeProductInventory(remaining);
+  res.json({ removed: removedCount });
 }
 
 module.exports = {

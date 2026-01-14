@@ -22876,7 +22876,7 @@
     "preco_unitario": 1200
   },
   {
-    "codigo": "3930",
+    "codigo": "3646",
     "codigo_barras": "",
     "nome": "003646 CONJUNTO MASC INFANTIL CAMISA LISA+SHORT LINHO 0,00",
     "quantidade": 17,
@@ -24549,7 +24549,7 @@
     "preco_unitario": 3000
   },
   {
-    "codigo": "3940",
+    "codigo": "3939",
     "codigo_barras": "",
     "nome": "003939 CAMISA SOCIAL MASC INFANTO JUVENIL LISA MANGA 1,00",
     "quantidade": 10,
@@ -33040,11 +33040,11 @@
     "preco_unitario": 1300
   },
   {
-    "codigo": "376",
+    "codigo": "1611",
     "codigo_barras": "",
-    "nome": "000376 BLUSA FEM VR 360,00",
-    "quantidade": 9,
-    "preco_unitario": 1300
+    "nome": "BLUSA FEM VR",
+    "quantidade": 0,
+    "preco_unitario": 848
   },
   {
     "codigo": "378",
@@ -33258,7 +33258,7 @@
   },
   {
     "codigo": "",
-    "codigo_barras": "002354 MACAQUINHO ALFAIATARIA PLUS WF",
+    "codigo_barras": "000617 BOLSA DETALHE MATERIAL CROCO MD",
     "nome": "0,00",
     "quantidade": 8.5,
     "preco_unitario": 1500
@@ -33327,8 +33327,8 @@
     "preco_unitario": 2000
   },
   {
-    "codigo": "669",
-    "codigo_barras": "7908345514882",
+    "codigo": "668",
+    "codigo_barras": "7908345514868",
     "nome": "000668 KIT BEM VINDO BEBE C/ ZIPER 2 PCS TAM RN 0,00",
     "quantidade": 63.99,
     "preco_unitario": 7500
@@ -33348,8 +33348,8 @@
     "preco_unitario": 1800
   },
   {
-    "codigo": "680",
-    "codigo_barras": "7908345503473",
+    "codigo": "677",
+    "codigo_barras": "7908345503442",
     "nome": "000677 BODY REG GOLA TAM M 2,00",
     "quantidade": 13.3,
     "preco_unitario": 1800
@@ -33369,8 +33369,8 @@
     "preco_unitario": 1800
   },
   {
-    "codigo": "687",
-    "codigo_barras": "7908345503558",
+    "codigo": "681",
+    "codigo_barras": "7908345503480",
     "nome": "000681 BODY REG GOLA TAM P 2,00",
     "quantidade": 13.3,
     "preco_unitario": 1800
@@ -33418,15 +33418,15 @@
     "preco_unitario": 1800
   },
   {
-    "codigo": "706",
-    "codigo_barras": "7908345503787",
+    "codigo": "700",
+    "codigo_barras": "7908345503718",
     "nome": "000700 BODY MANGA LONGA GOLA TAM G 2,00",
     "quantidade": 15.2,
     "preco_unitario": 2000
   },
   {
-    "codigo": "707",
-    "codigo_barras": "7908345503794",
+    "codigo": "701",
+    "codigo_barras": "7908345503725",
     "nome": "000701 BODY MANGA LONGA GOLA TAM M 1,00",
     "quantidade": 15.2,
     "preco_unitario": 2000
@@ -33453,8 +33453,8 @@
     "preco_unitario": 2000
   },
   {
-    "codigo": "711",
-    "codigo_barras": "7908345503831",
+    "codigo": "705",
+    "codigo_barras": "7908345503763",
     "nome": "000705 BODY MANGA LONGA GOLA TAM P 0,00",
     "quantidade": 15.2,
     "preco_unitario": 2000
@@ -33467,50 +33467,50 @@
     "preco_unitario": 2000
   },
   {
-    "codigo": "722",
-    "codigo_barras": "7908345505330",
+    "codigo": "719",
+    "codigo_barras": "7908345505262",
     "nome": "000719 CAMISETA MANGA CURTA TAM M 0,00",
     "quantidade": 10.8,
     "preco_unitario": 1500
   },
   {
-    "codigo": "723",
-    "codigo_barras": "7908345505347",
+    "codigo": "720",
+    "codigo_barras": "7908345505279",
     "nome": "000720 CAMISETA MANGA CURTA TAM P 0,00",
     "quantidade": 10.8,
     "preco_unitario": 1500
   },
   {
-    "codigo": "2143",
-    "codigo_barras": "7908345505286",
+    "codigo": "721",
+    "codigo_barras": "7908345505323",
     "nome": "000721 CAMISETA MANGA CURTA TAM G 0,00",
     "quantidade": 10.8,
     "preco_unitario": 1500
   },
   {
-    "codigo": "2776",
-    "codigo_barras": "7908345505798",
+    "codigo": "724",
+    "codigo_barras": "7908345505705",
     "nome": "000724 KIT C/ 3 CAMISETA REG LEVE TAM G 3,00",
     "quantidade": 22.2,
     "preco_unitario": 2800
   },
   {
-    "codigo": "725",
-    "codigo_barras": "7908345505712",
-    "nome": "000725 KIT C/ 3 CAMISETA REG LEVE TAM M 0,00",
-    "quantidade": 22.2,
-    "preco_unitario": 2800
+    "codigo": "2777",
+    "codigo_barras": "",
+    "nome": "KIT C/ 3 CAMISETA REG LEVE TAM M",
+    "quantidade": 4,
+    "preco_unitario": 2220
   },
   {
-    "codigo": "2147",
-    "codigo_barras": "7908345505750",
+    "codigo": "726",
+    "codigo_barras": "7908345505729",
     "nome": "000726 KIT C/ 3 CAMISETA REG LEVE TAM P 2,00",
     "quantidade": 22.2,
     "preco_unitario": 2800
   },
   {
-    "codigo": "2145",
-    "codigo_barras": "7908345505736",
+    "codigo": "727",
+    "codigo_barras": "7908345505767",
     "nome": "000727 KIT C/ 3 CAMISETA REG LEVE TAM G 1,00",
     "quantidade": 22.2,
     "preco_unitario": 2800
@@ -33544,11 +33544,11 @@
     "preco_unitario": 900
   },
   {
-    "codigo": "732",
-    "codigo_barras": "7908345506443",
-    "nome": "000732 KIT C/3 PARES DE SAPATINHOS TAM RN 9,00",
-    "quantidade": 6.95,
-    "preco_unitario": 900
+    "codigo": "3339",
+    "codigo_barras": "",
+    "nome": "KIT C/3 PARES DE SAPATINHOS TAM RN",
+    "quantidade": 11,
+    "preco_unitario": 695
   },
   {
     "codigo": "733",
@@ -33558,8 +33558,8 @@
     "preco_unitario": 900
   },
   {
-    "codigo": "3743",
-    "codigo_barras": "7908345500328",
+    "codigo": "740",
+    "codigo_barras": "7908345507341",
     "nome": "000740 KIT GORRO/SAPATINHO/LUVINHA (PAR) TAM RN 0,00",
     "quantidade": 9.6,
     "preco_unitario": 1200
@@ -33572,102 +33572,102 @@
     "preco_unitario": 1200
   },
   {
-    "codigo": "745",
-    "codigo_barras": "7908345507501",
+    "codigo": "742",
+    "codigo_barras": "7908345507419",
     "nome": "000742 MIJAO C/ PE REVER TAM G 0,00",
     "quantidade": 9.99,
     "preco_unitario": 1500
   },
   {
-    "codigo": "743",
-    "codigo_barras": "7908345507426",
-    "nome": "000743 MIJAO C/ PE REVER TAM M 1,00",
-    "quantidade": 9.99,
-    "preco_unitario": 1500
+    "codigo": "746",
+    "codigo_barras": "",
+    "nome": "MIJAO C/ PE REVER TAM M",
+    "quantidade": 0,
+    "preco_unitario": 999
   },
   {
-    "codigo": "748",
-    "codigo_barras": "7908345507662",
-    "nome": "000748 BONE TAM G 0,00",
-    "quantidade": 9.3,
-    "preco_unitario": 1200
+    "codigo": "1429",
+    "codigo_barras": "",
+    "nome": "BONE TAM G",
+    "quantidade": 2,
+    "preco_unitario": 930
   },
   {
-    "codigo": "1430",
-    "codigo_barras": "7908345507648",
+    "codigo": "749",
+    "codigo_barras": "7908345507679",
     "nome": "000749 BONE TAM M 3,00",
     "quantidade": 8.95,
     "preco_unitario": 1200
   },
   {
-    "codigo": "750",
-    "codigo_barras": "7908345507686",
-    "nome": "000750 BONE TAM P 6,00",
-    "quantidade": 9.3,
-    "preco_unitario": 1200
+    "codigo": "1431",
+    "codigo_barras": "",
+    "nome": "BONE TAM P",
+    "quantidade": 3,
+    "preco_unitario": 930
   },
   {
-    "codigo": "751",
-    "codigo_barras": "7908345507730",
-    "nome": "000751 CHAPEU TAM G 2,00",
-    "quantidade": 8.95,
-    "preco_unitario": 1200
+    "codigo": "1432",
+    "codigo_barras": "",
+    "nome": "CHAPEU TAM G",
+    "quantidade": 0,
+    "preco_unitario": 895
   },
   {
-    "codigo": "752",
-    "codigo_barras": "7908345507747",
-    "nome": "000752 CHAPEU TAM M 1,00",
-    "quantidade": 8.95,
-    "preco_unitario": 1200
+    "codigo": "1433",
+    "codigo_barras": "",
+    "nome": "CHAPEU TAM M",
+    "quantidade": 0,
+    "preco_unitario": 895
   },
   {
-    "codigo": "1434",
-    "codigo_barras": "7908345507723",
+    "codigo": "753",
+    "codigo_barras": "7908345507754",
     "nome": "000753 CHAPEU TAM P 2,00",
     "quantidade": 8.95,
     "preco_unitario": 1200
   },
   {
-    "codigo": "754",
-    "codigo_barras": "7908345507846",
-    "nome": "000754 MACACAO REG GOLA TAM G 4,00",
-    "quantidade": 18.5,
-    "preco_unitario": 2400
+    "codigo": "757",
+    "codigo_barras": "",
+    "nome": "MACACAO REG GOLA TAM G",
+    "quantidade": 0,
+    "preco_unitario": 1850
   },
   {
-    "codigo": "755",
-    "codigo_barras": "7908345507853",
-    "nome": "000755 MACACAO REG GOLA TAM M 4,00",
-    "quantidade": 18.5,
-    "preco_unitario": 2400
+    "codigo": "758",
+    "codigo_barras": "",
+    "nome": "MACACAO REG GOLA TAM M",
+    "quantidade": 3,
+    "preco_unitario": 1850
   },
   {
-    "codigo": "759",
-    "codigo_barras": "7908345507907",
+    "codigo": "756",
+    "codigo_barras": "7908345507860",
     "nome": "000756 MACACAO REG GOLA TAM P 2,00",
     "quantidade": 18.5,
     "preco_unitario": 2400
   },
   {
-    "codigo": "760",
-    "codigo_barras": "7908345512505",
-    "nome": "000760 KIT C/ 2 CAMISETA REG LEVE TAM G 13,00",
-    "quantidade": 14.8,
-    "preco_unitario": 1800
+    "codigo": "763",
+    "codigo_barras": "",
+    "nome": "KIT C/ 2 CAMISETA REG LEVE TAM G",
+    "quantidade": 7,
+    "preco_unitario": 1480
   },
   {
-    "codigo": "761",
-    "codigo_barras": "7908345512512",
-    "nome": "000761 KIT C/ 2 CAMISETA REG LEVE TAM M 11,00",
-    "quantidade": 14.8,
-    "preco_unitario": 1800
+    "codigo": "764",
+    "codigo_barras": "",
+    "nome": "KIT C/ 2 CAMISETA REG LEVE TAM M",
+    "quantidade": 8,
+    "preco_unitario": 1480
   },
   {
-    "codigo": "762",
-    "codigo_barras": "7908345512529",
-    "nome": "000762 KIT C/ 2 CAMISETA REG LEVE TAM P 7,00",
-    "quantidade": 14.8,
-    "preco_unitario": 1800
+    "codigo": "765",
+    "codigo_barras": "",
+    "nome": "KIT C/ 2 CAMISETA REG LEVE TAM P",
+    "quantidade": 5,
+    "preco_unitario": 1480
   },
   {
     "codigo": "778",
@@ -33677,8 +33677,8 @@
     "preco_unitario": 3200
   },
   {
-    "codigo": "780",
-    "codigo_barras": "7908345512260",
+    "codigo": "779",
+    "codigo_barras": "7908345512253",
     "nome": "000779 CONJ PAGAO 3 PECAS TAM RN 0,00",
     "quantidade": 25.7,
     "preco_unitario": 3200
@@ -33845,11 +33845,11 @@
     "preco_unitario": 5800
   },
   {
-    "codigo": "984",
+    "codigo": "989",
     "codigo_barras": "",
-    "nome": "000984 BLUSA FEM CANELADA AL 13,00",
-    "quantidade": 8,
-    "preco_unitario": 1300
+    "nome": "BLUSA FEM CANELADA AL",
+    "quantidade": 0,
+    "preco_unitario": 800
   },
   {
     "codigo": "985",
@@ -34048,22 +34048,22 @@
     "preco_unitario": 700
   },
   {
-    "codigo": "2114",
-    "codigo_barras": "7908345515025",
+    "codigo": "2113",
+    "codigo_barras": "7908345514950",
     "nome": "002113 MACACAO C/ ZIPER LAT TAM M 0,00",
     "quantidade": 29.99,
     "preco_unitario": 3800
   },
   {
-    "codigo": "1412",
-    "codigo_barras": "7908345515032",
+    "codigo": "1411",
+    "codigo_barras": "7908345514967",
     "nome": "001411 MACACAO C/ ZIPER LAT TAM G 0,00",
     "quantidade": 29.99,
     "preco_unitario": 3800
   },
   {
-    "codigo": "1414",
-    "codigo_barras": "7908345515322",
+    "codigo": "1413",
+    "codigo_barras": "7908345515254",
     "nome": "001413 MACACAO C/ ZIPER LAT TAM 1 0,00",
     "quantidade": 37.99,
     "preco_unitario": 4500
@@ -34083,43 +34083,43 @@
     "preco_unitario": 1200
   },
   {
-    "codigo": "1437",
-    "codigo_barras": "7908345507808",
+    "codigo": "1435",
+    "codigo_barras": "7908345507778",
     "nome": "001435 KIT C/2 MIJOES TAM G 5,00",
     "quantidade": 19.3,
     "preco_unitario": 2500
   },
   {
-    "codigo": "1436",
-    "codigo_barras": "7908345507785",
-    "nome": "001436 KIT C/2 MIJOES TAM M 2,00",
-    "quantidade": 19.3,
-    "preco_unitario": 2500
+    "codigo": "1438",
+    "codigo_barras": "",
+    "nome": "KIT C/2 MIJOES TAM M",
+    "quantidade": 3,
+    "preco_unitario": 1930
   },
   {
-    "codigo": "1439",
-    "codigo_barras": "7908345512895",
-    "nome": "001439 CONJ REG C/VIES + SHORT BALAO TAM G 0,00",
-    "quantidade": 16.9,
-    "preco_unitario": 2200
+    "codigo": "1441",
+    "codigo_barras": "",
+    "nome": "CONJ REG C/VIES + SHORT BALAO TAM G",
+    "quantidade": 1,
+    "preco_unitario": 1690
   },
   {
-    "codigo": "1440",
-    "codigo_barras": "7908345512901",
-    "nome": "001440 CONJ REG C/VIES + SHORT BALAO TAM M 4,00",
-    "quantidade": 16.9,
-    "preco_unitario": 2200
+    "codigo": "1442",
+    "codigo_barras": "",
+    "nome": "CONJ REG C/VIES + SHORT BALAO TAM M",
+    "quantidade": 0,
+    "preco_unitario": 1690
   },
   {
-    "codigo": "1443",
-    "codigo_barras": "7908345511874",
-    "nome": "001443 KIT C/ 2 MIJOES TAM 1 2,00",
-    "quantidade": 22.6,
-    "preco_unitario": 2800
+    "codigo": "1445",
+    "codigo_barras": "",
+    "nome": "KIT C/ 2 MIJOES TAM 1",
+    "quantidade": 3,
+    "preco_unitario": 2370
   },
   {
-    "codigo": "1446",
-    "codigo_barras": "7908345511911",
+    "codigo": "1444",
+    "codigo_barras": "7908345511881",
     "nome": "001444 KIT C/ 2 MIJOES TAM 2 3,00",
     "quantidade": 22.6,
     "preco_unitario": 2800
@@ -34356,18 +34356,18 @@
     "preco_unitario": 2200
   },
   {
-    "codigo": "5034",
+    "codigo": "1866",
     "codigo_barras": "7898954378848",
     "nome": "001866 CAMINHAO TRUCK BOMBEIRO SHILINKADO 0,00",
     "quantidade": 14.15,
     "preco_unitario": 1800
   },
   {
-    "codigo": "1867",
+    "codigo": "5035",
     "codigo_barras": "",
-    "nome": "001867 CAMINHAO TRUCK CARGUEIRO SHILINKADO 0,00",
-    "quantidade": 14.15,
-    "preco_unitario": 1800
+    "nome": "CAMINHAO TRUCK CARGUEIRO SHILINKADO",
+    "quantidade": 1,
+    "preco_unitario": 1596
   },
   {
     "codigo": "1897",
@@ -34538,8 +34538,8 @@
     "preco_unitario": 1800
   },
   {
-    "codigo": "2121",
-    "codigo_barras": "7908345503961",
+    "codigo": "2117",
+    "codigo_barras": "7908345503893",
     "nome": "002117 BODY REG TAM M 3,00",
     "quantidade": 13.1,
     "preco_unitario": 1800
@@ -34559,8 +34559,8 @@
     "preco_unitario": 1800
   },
   {
-    "codigo": "2122",
-    "codigo_barras": "7908345503978",
+    "codigo": "2120",
+    "codigo_barras": "7908345503947",
     "nome": "002120 BODY REG TAM P 3,00",
     "quantidade": 13.1,
     "preco_unitario": 1800
@@ -34573,8 +34573,8 @@
     "preco_unitario": 1800
   },
   {
-    "codigo": "2128",
-    "codigo_barras": "7908345504081",
+    "codigo": "2126",
+    "codigo_barras": "7908345504043",
     "nome": "002126 BODY MANGA CURTA TAM P 0,00",
     "quantidade": 14.2,
     "preco_unitario": 1800
@@ -34587,11 +34587,11 @@
     "preco_unitario": 2200
   },
   {
-    "codigo": "2138",
-    "codigo_barras": "7908345505057",
-    "nome": "002138 SANDALIA BEBE FRENTE UNICA TAM M K035M-LM 8,00",
-    "quantidade": 17.89,
-    "preco_unitario": 2200
+    "codigo": "2141",
+    "codigo_barras": "",
+    "nome": "SANDALIA BEBE FRENTE UNICA TAM M K035M-LM",
+    "quantidade": 6,
+    "preco_unitario": 1789
   },
   {
     "codigo": "2146",
@@ -34601,127 +34601,127 @@
     "preco_unitario": 2800
   },
   {
-    "codigo": "2149",
-    "codigo_barras": "7908345507822",
+    "codigo": "2148",
+    "codigo_barras": "7908345507792",
     "nome": "002148 KIT C/2 MIJOES TAM P 5,00",
     "quantidade": 19.3,
     "preco_unitario": 2500
   },
   {
-    "codigo": "2153",
-    "codigo_barras": "7908345508119",
+    "codigo": "2150",
+    "codigo_barras": "7908345508089",
     "nome": "002150 KIT C/2 MIJOES C/PE REVER TAM G 6,00",
     "quantidade": 22,
     "preco_unitario": 2800
   },
   {
-    "codigo": "2151",
-    "codigo_barras": "7908345508096",
-    "nome": "002151 KIT C/2 MIJOES C/PE REVER TAM M 5,00",
-    "quantidade": 22,
-    "preco_unitario": 2800
+    "codigo": "2154",
+    "codigo_barras": "",
+    "nome": "KIT C/2 MIJOES C/PE REVER TAM M",
+    "quantidade": 6,
+    "preco_unitario": 2200
   },
   {
-    "codigo": "2152",
-    "codigo_barras": "7908345508102",
-    "nome": "002152 KIT C/2 MIJOES C/PE REVER TAM P 1,00",
-    "quantidade": 22,
-    "preco_unitario": 2800
+    "codigo": "2155",
+    "codigo_barras": "",
+    "nome": "KIT C/2 MIJOES C/PE REVER TAM P",
+    "quantidade": 4,
+    "preco_unitario": 2200
   },
   {
-    "codigo": "2159",
-    "codigo_barras": "7908345512475",
+    "codigo": "2156",
+    "codigo_barras": "7908345512444",
     "nome": "002156 KIT C/ 2 CAMISETA REG C/VIES TAM G 0,00",
     "quantidade": 16.8,
     "preco_unitario": 2200
   },
   {
-    "codigo": "2157",
-    "codigo_barras": "7908345512451",
-    "nome": "002157 KIT C/ 2 CAMISETA REG C/VIES TAM M 1,00",
-    "quantidade": 16.8,
-    "preco_unitario": 2200
+    "codigo": "2160",
+    "codigo_barras": "",
+    "nome": "KIT C/ 2 CAMISETA REG C/VIES TAM M",
+    "quantidade": 0,
+    "preco_unitario": 1680
   },
   {
-    "codigo": "2158",
-    "codigo_barras": "7908345512468",
-    "nome": "002158 KIT C/ 2 CAMISETA REG C/VIES TAM P 2,00",
-    "quantidade": 16.8,
-    "preco_unitario": 2200
+    "codigo": "2161",
+    "codigo_barras": "",
+    "nome": "KIT C/ 2 CAMISETA REG C/VIES TAM P",
+    "quantidade": 0,
+    "preco_unitario": 1680
   },
   {
-    "codigo": "2162",
-    "codigo_barras": "7908345512567",
-    "nome": "002162 KIT C/ 2 CAMISETA REG LEVE TAM 1 10,00",
-    "quantidade": 19.2,
-    "preco_unitario": 2200
+    "codigo": "2165",
+    "codigo_barras": "",
+    "nome": "KIT C/ 2 CAMISETA REG LEVE TAM 1",
+    "quantidade": 7,
+    "preco_unitario": 1920
   },
   {
-    "codigo": "2163",
-    "codigo_barras": "7908345512574",
-    "nome": "002163 KIT C/ 2 CAMISETA REG LEVE TAM 2 10,00",
-    "quantidade": 19.2,
-    "preco_unitario": 2200
+    "codigo": "2166",
+    "codigo_barras": "",
+    "nome": "KIT C/ 2 CAMISETA REG LEVE TAM 2",
+    "quantidade": 9,
+    "preco_unitario": 1920
   },
   {
-    "codigo": "2164",
-    "codigo_barras": "7908345512581",
-    "nome": "002164 KIT C/ 2 CAMISETA REG LEVE TAM 3 6,00",
-    "quantidade": 18.6,
-    "preco_unitario": 2200
+    "codigo": "2167",
+    "codigo_barras": "",
+    "nome": "KIT C/ 2 CAMISETA REG LEVE TAM 3",
+    "quantidade": 9,
+    "preco_unitario": 1920
   },
   {
-    "codigo": "2168",
-    "codigo_barras": "7908345512628",
-    "nome": "002168 KIT C/ 2 SHORT BALAO TAM G 4,00",
-    "quantidade": 17,
-    "preco_unitario": 2200
+    "codigo": "2171",
+    "codigo_barras": "",
+    "nome": "KIT C/ 2 SHORT BALAO TAM G",
+    "quantidade": 3,
+    "preco_unitario": 1700
   },
   {
-    "codigo": "2169",
-    "codigo_barras": "7908345512635",
-    "nome": "002169 KIT C/ 2 SHORT BALAO TAM M 2,00",
-    "quantidade": 17,
-    "preco_unitario": 2200
+    "codigo": "2172",
+    "codigo_barras": "",
+    "nome": "KIT C/ 2 SHORT BALAO TAM M",
+    "quantidade": 0,
+    "preco_unitario": 1700
   },
   {
-    "codigo": "2170",
-    "codigo_barras": "7908345512642",
-    "nome": "002170 KIT C/ 2 SHORT BALAO TAM P 4,00",
-    "quantidade": 17,
-    "preco_unitario": 2200
+    "codigo": "2173",
+    "codigo_barras": "",
+    "nome": "KIT C/ 2 SHORT BALAO TAM P",
+    "quantidade": 1,
+    "preco_unitario": 1700
   },
   {
-    "codigo": "2178",
-    "codigo_barras": "7908345512949",
+    "codigo": "2177",
+    "codigo_barras": "7908345512918",
     "nome": "002177 CONJ REG C/VIES + SHORT BALAO TAM P 0,00",
     "quantidade": 16.9,
     "preco_unitario": 2200
   },
   {
-    "codigo": "2182",
-    "codigo_barras": "7908345510143",
-    "nome": "002182 MACACAO REG TAM G 4,00",
-    "quantidade": 17.5,
-    "preco_unitario": 2400
+    "codigo": "2185",
+    "codigo_barras": "",
+    "nome": "MACACAO REG TAM G",
+    "quantidade": 3,
+    "preco_unitario": 1750
   },
   {
-    "codigo": "2183",
-    "codigo_barras": "7908345510150",
-    "nome": "002183 MACACAO REG TAM M 5,00",
-    "quantidade": 17.5,
-    "preco_unitario": 2400
+    "codigo": "2186",
+    "codigo_barras": "",
+    "nome": "MACACAO REG TAM M",
+    "quantidade": 3,
+    "preco_unitario": 1750
   },
   {
-    "codigo": "2184",
-    "codigo_barras": "7908345510167",
-    "nome": "002184 MACACAO REG TAM P 3,00",
-    "quantidade": 17.5,
-    "preco_unitario": 2400
+    "codigo": "2187",
+    "codigo_barras": "",
+    "nome": "MACACAO REG TAM P",
+    "quantidade": 2,
+    "preco_unitario": 1750
   },
   {
-    "codigo": "2189",
-    "codigo_barras": "7908345514523",
+    "codigo": "2188",
+    "codigo_barras": "7908345514509",
     "nome": "002188 MACACAO REVER C/ ZIPER LAT TAM RN 0,00",
     "quantidade": 23.99,
     "preco_unitario": 3200
@@ -35154,22 +35154,22 @@
     "preco_unitario": 2000
   },
   {
-    "codigo": "3337",
-    "codigo_barras": "7908345506399",
+    "codigo": "3328",
+    "codigo_barras": "7908345506412",
     "nome": "003328 KIT C/3 PARES DE LUVINHAS TAM RN 8,00",
     "quantidade": 6.7,
     "preco_unitario": 900
   },
   {
-    "codigo": "3347",
-    "codigo_barras": "7908345513021",
+    "codigo": "3332",
+    "codigo_barras": "7908345513014",
     "nome": "003332 CONJ PAGAO 6 PECAS TAM RN 0,00",
     "quantidade": 34.5,
     "preco_unitario": 4000
   },
   {
-    "codigo": "3335",
-    "codigo_barras": "7908345506252",
+    "codigo": "3333",
+    "codigo_barras": "7908345506238",
     "nome": "003333 CONJ SAPATINHO/LUVINHA (PAR) TAM RN 10,00",
     "quantidade": 4.65,
     "preco_unitario": 600
@@ -35203,15 +35203,15 @@
     "preco_unitario": 600
   },
   {
-    "codigo": "3342",
-    "codigo_barras": "7908345507174",
+    "codigo": "3341",
+    "codigo_barras": "7908345507150",
     "nome": "003341 GORRINHO TAM RN 0,00",
     "quantidade": 4.75,
     "preco_unitario": 600
   },
   {
-    "codigo": "3351",
-    "codigo_barras": "7908345512291",
+    "codigo": "3350",
+    "codigo_barras": "7908345512284",
     "nome": "003350 CONJ PAGAO REVER 3 PECAS TAM RN 0,00",
     "quantidade": 26.85,
     "preco_unitario": 3200
@@ -35336,8 +35336,8 @@
     "preco_unitario": 1300
   },
   {
-    "codigo": "3725",
-    "codigo_barras": "7908345501721",
+    "codigo": "3721",
+    "codigo_barras": "7908345501684",
     "nome": "003721 BODY REG GOLA TAM G 0,00",
     "quantidade": 16.5,
     "preco_unitario": 1800
@@ -35427,36 +35427,36 @@
     "preco_unitario": 1300
   },
   {
-    "codigo": "3726",
-    "codigo_barras": "7908345501738",
+    "codigo": "3722",
+    "codigo_barras": "7908345501691",
     "nome": "003722 BODY REG GOLA TAM M 0,00",
     "quantidade": 16.5,
     "preco_unitario": 1800
   },
   {
-    "codigo": "3727",
-    "codigo_barras": "7908345501745",
+    "codigo": "3723",
+    "codigo_barras": "7908345501707",
     "nome": "003723 BODY REG GOLA TAM P 0,00",
     "quantidade": 16.5,
     "preco_unitario": 1800
   },
   {
-    "codigo": "3728",
-    "codigo_barras": "7908345501752",
+    "codigo": "3724",
+    "codigo_barras": "7908345501714",
     "nome": "003724 BODY REG GOLA TAM RN 0,00",
     "quantidade": 16.5,
     "preco_unitario": 1800
   },
   {
-    "codigo": "3731",
-    "codigo_barras": "7908345502315",
+    "codigo": "3729",
+    "codigo_barras": "7908345502278",
     "nome": "003729 BODY MANGA LONGA GOLA TAM M 0,00",
     "quantidade": 19.4,
     "preco_unitario": 2200
   },
   {
-    "codigo": "3736",
-    "codigo_barras": "7908345500281",
+    "codigo": "3735",
+    "codigo_barras": "7908345500274",
     "nome": "003735 CONJ SAPATINHO/LUVINHA (PAR) TAM RN 0,00",
     "quantidade": 5.65,
     "preco_unitario": 600
@@ -35469,36 +35469,36 @@
     "preco_unitario": 600
   },
   {
-    "codigo": "3765",
-    "codigo_barras": "7908345522412",
-    "nome": "003765 CONJ REG C/VIES + TAPA FRALDA TAM G 0,00",
-    "quantidade": 18.45,
-    "preco_unitario": 2400
+    "codigo": "3768",
+    "codigo_barras": "",
+    "nome": "CONJ REG C/VIES + TAPA FRALDA TAM G",
+    "quantidade": 3,
+    "preco_unitario": 1845
   },
   {
-    "codigo": "3766",
-    "codigo_barras": "7908345522405",
-    "nome": "003766 CONJ REG C/VIES + TAPA FRALDA TAM M 1,00",
-    "quantidade": 18.45,
-    "preco_unitario": 2400
+    "codigo": "3769",
+    "codigo_barras": "",
+    "nome": "CONJ REG C/VIES + TAPA FRALDA TAM M",
+    "quantidade": 2,
+    "preco_unitario": 1845
   },
   {
-    "codigo": "3767",
-    "codigo_barras": "7908345522399",
-    "nome": "003767 CONJ REG C/VIES + TAPA FRALDA TAM P 0,00",
-    "quantidade": 18.45,
-    "preco_unitario": 2400
+    "codigo": "3770",
+    "codigo_barras": "",
+    "nome": "CONJ REG C/VIES + TAPA FRALDA TAM P",
+    "quantidade": 2,
+    "preco_unitario": 1845
   },
   {
-    "codigo": "3773",
-    "codigo_barras": "7908345520807",
+    "codigo": "3771",
+    "codigo_barras": "7908345520722",
     "nome": "003771 MACACAO C/ZIPER LAT TAM G 0,00",
     "quantidade": 26.9,
     "preco_unitario": 3800
   },
   {
-    "codigo": "3774",
-    "codigo_barras": "7908345520791",
+    "codigo": "3772",
+    "codigo_barras": "7908345520715",
     "nome": "003772 MACACAO C/ZIPER LAT TAM M 0,00",
     "quantidade": 26.9,
     "preco_unitario": 3800
@@ -35511,36 +35511,36 @@
     "preco_unitario": 3500
   },
   {
-    "codigo": "3776",
-    "codigo_barras": "7908345507228",
-    "nome": "003776 KIT C/3 MIJOES TAM M 1,00",
-    "quantidade": 28.95,
-    "preco_unitario": 3500
+    "codigo": "3788",
+    "codigo_barras": "",
+    "nome": "KIT C/3 MIJOES TAM M",
+    "quantidade": 10,
+    "preco_unitario": 2895
   },
   {
-    "codigo": "3777",
-    "codigo_barras": "7908345507235",
-    "nome": "003777 KIT C/3 MIJOES TAM P 3,00",
-    "quantidade": 28.95,
-    "preco_unitario": 3500
+    "codigo": "3789",
+    "codigo_barras": "",
+    "nome": "KIT C/3 MIJOES TAM P",
+    "quantidade": 7,
+    "preco_unitario": 2895
   },
   {
-    "codigo": "3786",
-    "codigo_barras": "7908345518088",
+    "codigo": "3778",
+    "codigo_barras": "7908345518064",
     "nome": "003778 KIT C/3 MIJOES TAM RN 2,00",
     "quantidade": 28.95,
     "preco_unitario": 3500
   },
   {
-    "codigo": "3787",
-    "codigo_barras": "7908345507303",
+    "codigo": "3779",
+    "codigo_barras": "7908345507242",
     "nome": "003779 KIT C/3 MIJOES TAM G 7,00",
     "quantidade": 28.95,
     "preco_unitario": 3500
   },
   {
-    "codigo": "3784",
-    "codigo_barras": "7908345507280",
+    "codigo": "3780",
+    "codigo_barras": "7908345507259",
     "nome": "003780 KIT C/3 MIJOES TAM M 5,00",
     "quantidade": 28.95,
     "preco_unitario": 3500
@@ -35574,18 +35574,18 @@
     "preco_unitario": 3500
   },
   {
-    "codigo": "3791",
-    "codigo_barras": "7908345518057",
-    "nome": "003791 KIT C/2 MIJOES TAM RN 3,00",
-    "quantidade": 19.3,
-    "preco_unitario": 2500
+    "codigo": "3792",
+    "codigo_barras": "",
+    "nome": "KIT C/2 MIJOES TAM RN",
+    "quantidade": 2,
+    "preco_unitario": 1930
   },
   {
-    "codigo": "3793",
-    "codigo_barras": "7908345518101",
-    "nome": "003793 KIT C/2 MIJOES C/PE REVER TAM RN 3,00",
-    "quantidade": 22,
-    "preco_unitario": 2800
+    "codigo": "3794",
+    "codigo_barras": "",
+    "nome": "KIT C/2 MIJOES C/PE REVER TAM RN",
+    "quantidade": 0,
+    "preco_unitario": 2200
   },
   {
     "codigo": "3816",
@@ -35728,8 +35728,8 @@
     "preco_unitario": 2200
   },
   {
-    "codigo": "4833",
-    "codigo_barras": "7899110649994",
+    "codigo": "4253",
+    "codigo_barras": "7899110649987",
     "nome": "004253 LANCA AGUA 0,00",
     "quantidade": 11.24,
     "preco_unitario": 1400
@@ -35833,11 +35833,354 @@
     "preco_unitario": 1000
   },
   {
-    "codigo": "5011",
-    "codigo_barras": "7908345515681",
+    "codigo": "5010",
+    "codigo_barras": "7908345515650",
     "nome": "005010 CAMISETA REG C/VIES TAM 2 2,00",
     "quantidade": 13.4,
     "preco_unitario": 1800
+  },
+  {
+    "codigo": "5063",
+    "codigo_barras": "",
+    "nome": "KIT C/2 CAMISETA REG C/VIES TAM M",
+    "quantidade": 4,
+    "preco_unitario": 1789
+  },
+  {
+    "codigo": "5013",
+    "codigo_barras": "7908345520098",
+    "nome": "005013 KIT C/2 CAMISETA REG C/VIES TAM P 2,00",
+    "quantidade": 17.89,
+    "preco_unitario": 2200
+  },
+  {
+    "codigo": "5062",
+    "codigo_barras": "",
+    "nome": "KIT C/2 CAMISETA REG C/VIES TAM G",
+    "quantidade": 2,
+    "preco_unitario": 1789
+  },
+  {
+    "codigo": "5074",
+    "codigo_barras": "",
+    "nome": "005074 VESTIDO CURTO FEM ADT MALHA CREPE MD -1,00",
+    "quantidade": 35,
+    "preco_unitario": 4800
+  },
+  {
+    "codigo": "2144",
+    "codigo_barras": "",
+    "nome": "CAMISETA MANGA CURTA TAM M",
+    "quantidade": 1,
+    "preco_unitario": 1140
+  },
+  {
+    "codigo": "2778",
+    "codigo_barras": "",
+    "nome": "KIT C/ 3 CAMISETA REG LEVE TAM P",
+    "quantidade": 0,
+    "preco_unitario": 2220
+  },
+  {
+    "codigo": "3646",
+    "codigo_barras": "",
+    "nome": "CONJUNTO MASC INFANTIL CAMISA LISA+SHORT LINHO ATE 8 ANOS NK",
+    "quantidade": 0,
+    "preco_unitario": 1700
+  },
+  {
+    "codigo": "3790",
+    "codigo_barras": "",
+    "nome": "KIT C/3 MIJOES TAM RN",
+    "quantidade": 4,
+    "preco_unitario": 2895
+  },
+  {
+    "codigo": "3939",
+    "codigo_barras": "",
+    "nome": "CAMISA SOCIAL MASC INFANTO JUVENIL LISA MANGA CURTA AC",
+    "quantidade": 1,
+    "preco_unitario": 1000
+  },
+  {
+    "codigo": "376",
+    "codigo_barras": "",
+    "nome": "000376 BLUSA FEM VR 360,00",
+    "quantidade": 9,
+    "preco_unitario": 1300
+  },
+  {
+    "codigo": "725",
+    "codigo_barras": "7908345505712",
+    "nome": "000725 KIT C/ 3 CAMISETA REG LEVE TAM M 0,00",
+    "quantidade": 22.2,
+    "preco_unitario": 2800
+  },
+  {
+    "codigo": "732",
+    "codigo_barras": "7908345506443",
+    "nome": "000732 KIT C/3 PARES DE SAPATINHOS TAM RN 9,00",
+    "quantidade": 6.95,
+    "preco_unitario": 900
+  },
+  {
+    "codigo": "743",
+    "codigo_barras": "7908345507426",
+    "nome": "000743 MIJAO C/ PE REVER TAM M 1,00",
+    "quantidade": 9.99,
+    "preco_unitario": 1500
+  },
+  {
+    "codigo": "748",
+    "codigo_barras": "7908345507662",
+    "nome": "000748 BONE TAM G 0,00",
+    "quantidade": 9.3,
+    "preco_unitario": 1200
+  },
+  {
+    "codigo": "750",
+    "codigo_barras": "7908345507686",
+    "nome": "000750 BONE TAM P 6,00",
+    "quantidade": 9.3,
+    "preco_unitario": 1200
+  },
+  {
+    "codigo": "751",
+    "codigo_barras": "7908345507730",
+    "nome": "000751 CHAPEU TAM G 2,00",
+    "quantidade": 8.95,
+    "preco_unitario": 1200
+  },
+  {
+    "codigo": "752",
+    "codigo_barras": "7908345507747",
+    "nome": "000752 CHAPEU TAM M 1,00",
+    "quantidade": 8.95,
+    "preco_unitario": 1200
+  },
+  {
+    "codigo": "754",
+    "codigo_barras": "7908345507846",
+    "nome": "000754 MACACAO REG GOLA TAM G 4,00",
+    "quantidade": 18.5,
+    "preco_unitario": 2400
+  },
+  {
+    "codigo": "755",
+    "codigo_barras": "7908345507853",
+    "nome": "000755 MACACAO REG GOLA TAM M 4,00",
+    "quantidade": 18.5,
+    "preco_unitario": 2400
+  },
+  {
+    "codigo": "760",
+    "codigo_barras": "7908345512505",
+    "nome": "000760 KIT C/ 2 CAMISETA REG LEVE TAM G 13,00",
+    "quantidade": 14.8,
+    "preco_unitario": 1800
+  },
+  {
+    "codigo": "761",
+    "codigo_barras": "7908345512512",
+    "nome": "000761 KIT C/ 2 CAMISETA REG LEVE TAM M 11,00",
+    "quantidade": 14.8,
+    "preco_unitario": 1800
+  },
+  {
+    "codigo": "762",
+    "codigo_barras": "7908345512529",
+    "nome": "000762 KIT C/ 2 CAMISETA REG LEVE TAM P 7,00",
+    "quantidade": 14.8,
+    "preco_unitario": 1800
+  },
+  {
+    "codigo": "984",
+    "codigo_barras": "",
+    "nome": "000984 BLUSA FEM CANELADA AL 13,00",
+    "quantidade": 8,
+    "preco_unitario": 1300
+  },
+  {
+    "codigo": "1436",
+    "codigo_barras": "7908345507785",
+    "nome": "001436 KIT C/2 MIJOES TAM M 2,00",
+    "quantidade": 19.3,
+    "preco_unitario": 2500
+  },
+  {
+    "codigo": "1439",
+    "codigo_barras": "7908345512895",
+    "nome": "001439 CONJ REG C/VIES + SHORT BALAO TAM G 0,00",
+    "quantidade": 16.9,
+    "preco_unitario": 2200
+  },
+  {
+    "codigo": "1440",
+    "codigo_barras": "7908345512901",
+    "nome": "001440 CONJ REG C/VIES + SHORT BALAO TAM M 4,00",
+    "quantidade": 16.9,
+    "preco_unitario": 2200
+  },
+  {
+    "codigo": "1443",
+    "codigo_barras": "7908345511874",
+    "nome": "001443 KIT C/ 2 MIJOES TAM 1 2,00",
+    "quantidade": 22.6,
+    "preco_unitario": 2800
+  },
+  {
+    "codigo": "1867",
+    "codigo_barras": "",
+    "nome": "001867 CAMINHAO TRUCK CARGUEIRO SHILINKADO 0,00",
+    "quantidade": 14.15,
+    "preco_unitario": 1800
+  },
+  {
+    "codigo": "2138",
+    "codigo_barras": "7908345505057",
+    "nome": "002138 SANDALIA BEBE FRENTE UNICA TAM M K035M-LM 8,00",
+    "quantidade": 17.89,
+    "preco_unitario": 2200
+  },
+  {
+    "codigo": "2151",
+    "codigo_barras": "7908345508096",
+    "nome": "002151 KIT C/2 MIJOES C/PE REVER TAM M 5,00",
+    "quantidade": 22,
+    "preco_unitario": 2800
+  },
+  {
+    "codigo": "2152",
+    "codigo_barras": "7908345508102",
+    "nome": "002152 KIT C/2 MIJOES C/PE REVER TAM P 1,00",
+    "quantidade": 22,
+    "preco_unitario": 2800
+  },
+  {
+    "codigo": "2157",
+    "codigo_barras": "7908345512451",
+    "nome": "002157 KIT C/ 2 CAMISETA REG C/VIES TAM M 1,00",
+    "quantidade": 16.8,
+    "preco_unitario": 2200
+  },
+  {
+    "codigo": "2158",
+    "codigo_barras": "7908345512468",
+    "nome": "002158 KIT C/ 2 CAMISETA REG C/VIES TAM P 2,00",
+    "quantidade": 16.8,
+    "preco_unitario": 2200
+  },
+  {
+    "codigo": "2162",
+    "codigo_barras": "7908345512567",
+    "nome": "002162 KIT C/ 2 CAMISETA REG LEVE TAM 1 10,00",
+    "quantidade": 19.2,
+    "preco_unitario": 2200
+  },
+  {
+    "codigo": "2163",
+    "codigo_barras": "7908345512574",
+    "nome": "002163 KIT C/ 2 CAMISETA REG LEVE TAM 2 10,00",
+    "quantidade": 19.2,
+    "preco_unitario": 2200
+  },
+  {
+    "codigo": "2164",
+    "codigo_barras": "7908345512581",
+    "nome": "002164 KIT C/ 2 CAMISETA REG LEVE TAM 3 6,00",
+    "quantidade": 18.6,
+    "preco_unitario": 2200
+  },
+  {
+    "codigo": "2168",
+    "codigo_barras": "7908345512628",
+    "nome": "002168 KIT C/ 2 SHORT BALAO TAM G 4,00",
+    "quantidade": 17,
+    "preco_unitario": 2200
+  },
+  {
+    "codigo": "2169",
+    "codigo_barras": "7908345512635",
+    "nome": "002169 KIT C/ 2 SHORT BALAO TAM M 2,00",
+    "quantidade": 17,
+    "preco_unitario": 2200
+  },
+  {
+    "codigo": "2170",
+    "codigo_barras": "7908345512642",
+    "nome": "002170 KIT C/ 2 SHORT BALAO TAM P 4,00",
+    "quantidade": 17,
+    "preco_unitario": 2200
+  },
+  {
+    "codigo": "2182",
+    "codigo_barras": "7908345510143",
+    "nome": "002182 MACACAO REG TAM G 4,00",
+    "quantidade": 17.5,
+    "preco_unitario": 2400
+  },
+  {
+    "codigo": "2183",
+    "codigo_barras": "7908345510150",
+    "nome": "002183 MACACAO REG TAM M 5,00",
+    "quantidade": 17.5,
+    "preco_unitario": 2400
+  },
+  {
+    "codigo": "2184",
+    "codigo_barras": "7908345510167",
+    "nome": "002184 MACACAO REG TAM P 3,00",
+    "quantidade": 17.5,
+    "preco_unitario": 2400
+  },
+  {
+    "codigo": "3765",
+    "codigo_barras": "7908345522412",
+    "nome": "003765 CONJ REG C/VIES + TAPA FRALDA TAM G 0,00",
+    "quantidade": 18.45,
+    "preco_unitario": 2400
+  },
+  {
+    "codigo": "3766",
+    "codigo_barras": "7908345522405",
+    "nome": "003766 CONJ REG C/VIES + TAPA FRALDA TAM M 1,00",
+    "quantidade": 18.45,
+    "preco_unitario": 2400
+  },
+  {
+    "codigo": "3767",
+    "codigo_barras": "7908345522399",
+    "nome": "003767 CONJ REG C/VIES + TAPA FRALDA TAM P 0,00",
+    "quantidade": 18.45,
+    "preco_unitario": 2400
+  },
+  {
+    "codigo": "3776",
+    "codigo_barras": "7908345507228",
+    "nome": "003776 KIT C/3 MIJOES TAM M 1,00",
+    "quantidade": 28.95,
+    "preco_unitario": 3500
+  },
+  {
+    "codigo": "3777",
+    "codigo_barras": "7908345507235",
+    "nome": "003777 KIT C/3 MIJOES TAM P 3,00",
+    "quantidade": 28.95,
+    "preco_unitario": 3500
+  },
+  {
+    "codigo": "3791",
+    "codigo_barras": "7908345518057",
+    "nome": "003791 KIT C/2 MIJOES TAM RN 3,00",
+    "quantidade": 19.3,
+    "preco_unitario": 2500
+  },
+  {
+    "codigo": "3793",
+    "codigo_barras": "7908345518101",
+    "nome": "003793 KIT C/2 MIJOES C/PE REVER TAM RN 3,00",
+    "quantidade": 22,
+    "preco_unitario": 2800
   },
   {
     "codigo": "5012",
@@ -35847,24 +36190,10 @@
     "preco_unitario": 2200
   },
   {
-    "codigo": "5064",
-    "codigo_barras": "7908345520128",
-    "nome": "005013 KIT C/2 CAMISETA REG C/VIES TAM P 2,00",
-    "quantidade": 17.89,
-    "preco_unitario": 2200
-  },
-  {
     "codigo": "5061",
     "codigo_barras": "7908345520111",
     "nome": "005061 KIT C/2 CAMISETA REG C/VIES TAM G 3,00",
     "quantidade": 17.89,
     "preco_unitario": 2200
-  },
-  {
-    "codigo": "5074",
-    "codigo_barras": "",
-    "nome": "005074 VESTIDO CURTO FEM ADT MALHA CREPE MD -1,00",
-    "quantidade": 35,
-    "preco_unitario": 4800
   }
 ]
