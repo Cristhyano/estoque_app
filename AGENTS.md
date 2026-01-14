@@ -9,6 +9,7 @@
 - `src/components/Table.tsx`: contem todos os componentes de tabela (Table, TableHeader, TableBody, TableFooter, TableRow, TableHead, TableCell).
 - `src/templates/ProductTable.tsx`: tabela que consome a API e renderiza os produtos.
 - `src/pages/ProductList.tsx`: pagina com formulario de filtros, importacao e controles de paginacao.
+- `src/pages/InventoryScan.tsx`: pagina de leitura por scanner, input unico e tabela de leituras.
 - `src/components/Input.tsx` e `src/components/Divider.tsx`: componentes base.
 - `../estoque_api/server.js`: wiring da API.
 - `../estoque_api/routes/`: declaracao das rotas.
@@ -19,9 +20,11 @@
 
 ## UI atual
 - `src/pages/ProductList.tsx`: header com botao de upload (Radix Dialog), formulario de filtros, tabela e paginacao.
+- `src/pages/InventoryScan.tsx`: input com autofocus para leitura, debounce, feedback e tabela atualizada em tempo real.
 - `src/templates/ProductTable.tsx`: usa React Query, scroll apenas no corpo da tabela, header e footer fixos (sticky).
 - `src/templates/ProductTable.tsx`: formata moeda com `Intl.NumberFormat("pt-BR")`.
 - `src/components/Input.tsx`: aceita `icon` como `ReactNode` ou `ElementType`.
+- Navegacao simples: caminho contendo `/scan` renderiza a tela de leitura.
 
 ## API e filtros disponiveis
 Endpoint: `GET /products`
@@ -43,6 +46,7 @@ Importacao:
 - PDF: codigo do produto vem do inicio do nome (ate 6 digitos); barcode usa o campo de codigo do PDF quando tiver mais de 6.
 - CSV: codigo vem da coluna do arquivo; nome nao e usado para extrair codigo.
 - Upsert: cruza por nome normalizado (remove digitos iniciais) antes de `codigo`/`codigo_barras`.
+- Inventario: `POST /produto-inventario` registra leitura; `GET /produto-inventario/aberto` lista itens lidos.
 
 ## Implementacoes feitas
 - Formulario completo de filtros ligado ao estado em `src/pages/ProductList.tsx`.
@@ -55,6 +59,7 @@ Importacao:
 - Tabela com colunas separadas para `codigo` e `codigo_barras`.
 - Header/footer sticky com scroll apenas no corpo da tabela.
 - API refatorada para arquitetura minima com `routes/`, `controllers/`, `utils/`, `services/` e `swagger/`.
+- Tela de leitura por scanner com integracao em `produto_inventario`.
 
 ## Decisoes/importantes
 - Evitar caracteres nao ASCII sempre que possivel.
