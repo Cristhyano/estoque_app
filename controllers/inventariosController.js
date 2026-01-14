@@ -245,7 +245,7 @@ async function exportInventario(req, res) {
     products.map((item) => [item.codigo || item.codigo_barras || "", item])
   );
 
-  productInventory.forEach((item) => {
+  const rows = productInventory.map((item) => {
     const product = productsById.get(item.id_produto);
     const qtdSistema = Number(item.qtd_sistema ?? 0);
     const qtdConferidaNumber = Number(item.qtd_conferida ?? item.quantidade ?? 0);
@@ -254,8 +254,8 @@ async function exportInventario(req, res) {
     const valorSistema = Number(item.valor_sistema ?? 0);
     const valorConferido = Number(item.valor_conferido ?? 0);
     const diferencaValor = Number(item.diferenca_valor ?? 0);
-    worksheet.addRow({
-      codigo: product?.codigo || item.id_produto,
+    return {
+      codigo: String(product?.codigo || item.id_produto || ""),
       descricao: product?.nome ?? "",
       preco_unitario: precoUnitario,
       qtd_sistema: qtdSistema,
@@ -264,8 +264,12 @@ async function exportInventario(req, res) {
       valor_sistema: valorSistema,
       valor_conferido: valorConferido,
       diferenca: diferencaValor,
-    });
+    };
   });
+
+  rows
+    .sort((a, b) => a.codigo.localeCompare(b.codigo))
+    .forEach((row) => worksheet.addRow(row));
 
   worksheet.getColumn("preco_unitario").numFmt = "R$ #,##0.00";
   worksheet.getColumn("valor_sistema").numFmt = "R$ #,##0.00";
