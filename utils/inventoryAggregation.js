@@ -90,7 +90,7 @@ function aggregateInventoryItems({ items, products, config, inventoryId, include
   return aggregated;
 }
 
-function buildRecentReads({ items, products, config, inventoryId, limit = 10 }) {
+function buildRecentReads({ items, products, config, inventoryId, limit = 5 }) {
   const productMap = new Map(
     products.map((product) => [product.codigo || product.codigo_barras || "", product])
   );

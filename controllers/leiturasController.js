@@ -111,7 +111,7 @@ function deleteLeitura(req, res) {
     products,
     config,
     inventoryId,
-    limit: 10,
+    limit: 5,
   });
 
   res.json({
