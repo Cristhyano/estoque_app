@@ -2,7 +2,7 @@ const {
   readInventoryPeriods,
   writeInventoryPeriods,
 } = require("../utils/storage");
-const { parseInventoryPeriodInput } = require("../utils/inventory");
+const { parseInventoryPeriodInput, buildNextInventoryId } = require("../utils/inventory");
 const { buildListResponse } = require("../utils/pagination");
 
 function listInventarios(req, res) {
@@ -33,7 +33,7 @@ function createInventario(req, res) {
   }
 
   const periods = readInventoryPeriods();
-  const nextId = `INV-${new Date().toISOString().slice(0, 10).replace(/-/g, "")}-${String(periods.length + 1).padStart(3, "0")}`;
+  const nextId = buildNextInventoryId(periods);
   const newPeriod = { id: nextId, ...period };
   periods.push(newPeriod);
   writeInventoryPeriods(periods);

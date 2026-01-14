@@ -127,6 +127,68 @@
  *           type: integer
  *         totals:
  *           type: object
+ *     ProdutoInventario:
+ *       type: object
+ *       required:
+ *         - id_produto
+ *         - id_inventario
+ *         - quantidade
+ *       properties:
+ *         id_produto:
+ *           type: string
+ *           example: P001
+ *         id_inventario:
+ *           type: string
+ *           example: INV-20240101-001
+ *         quantidade:
+ *           type: integer
+ *           example: 3
+ *     ProdutoInventarioInput:
+ *       type: object
+ *       properties:
+ *         codigo:
+ *           type: string
+ *         codigo_barras:
+ *           type: string
+ *     ProdutoInventarioUpdate:
+ *       type: object
+ *       required:
+ *         - quantidade
+ *       properties:
+ *         codigo:
+ *           type: string
+ *         codigo_barras:
+ *           type: string
+ *         id_inventario:
+ *           type: string
+ *         quantidade:
+ *           type: integer
+ *     ProdutoInventarioResponse:
+ *       type: object
+ *       properties:
+ *         produto:
+ *           $ref: '#/components/schemas/Product'
+ *         inventario:
+ *           $ref: '#/components/schemas/InventoryPeriod'
+ *         relacionamento:
+ *           $ref: '#/components/schemas/ProdutoInventario'
+ *     PaginatedProdutoInventario:
+ *       type: object
+ *       properties:
+ *         items:
+ *           type: array
+ *           items:
+ *             $ref: '#/components/schemas/ProdutoInventario'
+ *         total_items:
+ *           type: integer
+ *         total_pages:
+ *           type: integer
+ *         page:
+ *           type: integer
+ *         limit:
+ *           type: integer
+ *         totals:
+ *           type: object
  *     ErrorResponse:
  *       type: object
  *       properties:
@@ -145,4 +207,6 @@
  *     description: Importacao de dados do inventario
  *   - name: Inventarios
  *     description: Conferencias de estoque com inicio e fim
+ *   - name: ProdutoInventario
+ *     description: Leitura de produtos em inventario aberto
  */

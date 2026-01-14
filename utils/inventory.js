@@ -49,4 +49,30 @@ function parseInventoryPeriodInput(body) {
   };
 }
 
-module.exports = { parseInventoryPeriodInput };
+function buildNextInventoryId(periods) {
+  const sequence = String(periods.length + 1).padStart(3, "0");
+  const datePart = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+  return `INV-${datePart}-${sequence}`;
+}
+
+function createOpenInventory(periods) {
+  const now = new Date().toISOString();
+  return {
+    id: buildNextInventoryId(periods),
+    nome: `Inventario ${now.slice(0, 10)}`,
+    inicio: now,
+    fim: null,
+    status: "aberto",
+  };
+}
+
+function getOpenInventory(periods) {
+  return periods.find((item) => item.status === "aberto") || null;
+}
+
+module.exports = {
+  parseInventoryPeriodInput,
+  buildNextInventoryId,
+  createOpenInventory,
+  getOpenInventory,
+};

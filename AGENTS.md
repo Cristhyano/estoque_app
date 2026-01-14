@@ -48,12 +48,15 @@ npm run dev
 - Financeiro: `preco_unitario` e inteiro; respostas incluem `preco_decimal` (calculado por `fator_conversao`).
 - Configuracoes: CRUD em `/config` (padrao `fator_conversao = 100`).
 - Importacao: `POST /import` detecta PDF/CSV e faz upsert; `/import/produtos` e `/import/inventario` continuam.
-- Regra de codigo: se `codigo` tiver mais de 5 caracteres, entra em `codigo_barras`; `codigo` curto fica em `codigo`.
-- PDF: codigo do produto e extraido do inicio do nome (ate 5 digitos); barcode usa o campo de codigo do PDF.
+- Regra de codigo: se `codigo` tiver mais de 6 caracteres, entra em `codigo_barras`; `codigo` curto fica em `codigo`.
+- PDF: codigo do produto e extraido do inicio do nome (ate 6 digitos); barcode usa o campo de codigo do PDF quando tiver mais de 6.
 - CSV: codigo vem da coluna do arquivo; nome nao e usado para extrair codigo.
 - Upsert: tenta casar por nome (normalizado, removendo digitos iniciais) antes de `codigo`/`codigo_barras`.
+- Importacao usa `multer` em memoria e `pdf-parse` para PDF.
 - Produtos: CRUD em `/products`; filtro por `codigo`, `codigo_barras`, `nome`, `quantidade_min/max`, `preco_min/max`, `preco_decimal_min/max`.
 - Paginacao opcional: `page` e `limit` em `/products` e `/inventarios`.
 - Select: `GET /products/select?codigo=...` retorna `codigo` e `nome`.
 - Inventarios (conferencia): CRUD em `/inventarios` com `inicio`, `fim`, `status`.
+- ProdutoInventario: CRUD em `/produto-inventario`; `POST` incrementa quantidade no inventario aberto usando codigo ou codigo_barras.
+- Relacionamentos persistem em `data/produto_inventario.json` e inventario aberto e criado automaticamente.
 - Seed: arquivo `seed.json` com 100 produtos de teste.

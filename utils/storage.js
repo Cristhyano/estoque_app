@@ -6,6 +6,7 @@ const dataDir = path.join(baseDir, "data");
 const dataFile = path.join(dataDir, "products.json");
 const configFile = path.join(dataDir, "config.json");
 const inventoryPeriodsFile = path.join(dataDir, "inventarios.json");
+const productInventoryFile = path.join(dataDir, "produto_inventario.json");
 
 function ensureDataFile() {
   if (!fs.existsSync(dataDir)) {
@@ -20,6 +21,9 @@ function ensureDataFile() {
       JSON.stringify({ fator_conversao: 100 }, null, 2),
       "utf8"
     );
+  }
+  if (!fs.existsSync(productInventoryFile)) {
+    fs.writeFileSync(productInventoryFile, "[]", "utf8");
   }
 }
 
@@ -60,6 +64,21 @@ function writeInventoryPeriods(periods) {
   );
 }
 
+function readProductInventory() {
+  ensureDataFile();
+  const raw = fs.readFileSync(productInventoryFile, "utf8");
+  try {
+    const data = JSON.parse(raw);
+    return Array.isArray(data) ? data : [];
+  } catch {
+    return [];
+  }
+}
+
+function writeProductInventory(items) {
+  fs.writeFileSync(productInventoryFile, JSON.stringify(items, null, 2), "utf8");
+}
+
 function readConfig() {
   ensureDataFile();
   const raw = fs.readFileSync(configFile, "utf8");
@@ -88,6 +107,8 @@ module.exports = {
   writeProducts,
   readInventoryPeriods,
   writeInventoryPeriods,
+  readProductInventory,
+  writeProductInventory,
   readConfig,
   writeConfig,
 };
