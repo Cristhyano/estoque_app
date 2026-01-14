@@ -258,7 +258,11 @@ const InventoryScan = () => {
 
     const closeMutation = useMutation({
         mutationFn: async () => {
-            const response = await fetch("http://localhost:3001/inventarios/aberto/fechar", {
+            const inventoryId = data?.inventario?.id
+            if (!inventoryId) {
+                throw new Error("Inventario nao encontrado")
+            }
+            const response = await fetch(`http://localhost:3001/inventarios/${inventoryId}/fechar`, {
                 method: "PATCH",
             })
             if (!response.ok) {

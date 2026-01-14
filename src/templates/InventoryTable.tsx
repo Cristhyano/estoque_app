@@ -106,8 +106,8 @@ const InventoryTable = ({ filters, onSortChange }: InventoryTableProps) => {
     })
 
     const closeMutation = useMutation({
-        mutationFn: async () => {
-            const response = await fetch("http://localhost:3001/inventarios/aberto/fechar", {
+        mutationFn: async (inventoryId: string) => {
+            const response = await fetch(`http://localhost:3001/inventarios/${inventoryId}/fechar`, {
                 method: "PATCH",
             })
             if (!response.ok) {
@@ -305,7 +305,7 @@ const InventoryTable = ({ filters, onSortChange }: InventoryTableProps) => {
                                                     className="bg-neutral-800 px-2 rounded text-white flex flex-row items-center gap-2 cursor-pointer disabled:opacity-60"
                                                     onClick={() => {
                                                         if (!window.confirm("Fechar inventario?")) return
-                                                        closeMutation.mutate()
+                                                        closeMutation.mutate(item.id)
                                                     }}
                                                     disabled={normalize(item.status) !== "aberto" || closeMutation.isPending}
                                                 >
