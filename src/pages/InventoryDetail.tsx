@@ -12,8 +12,9 @@ import {
     TableHead,
     TableHeader,
     TableRow,
+    TablePagination,
 } from "../components/Table"
-import { Barcode, ChevronLeft, ChevronRight, PackageSearch } from "lucide-react"
+import { Barcode, PackageSearch } from "lucide-react"
 
 type InventoryPeriod = {
     id: string
@@ -114,6 +115,21 @@ const InventoryDetail = () => {
                 page: String(nextPage),
             }
         })
+    }
+
+    const handlePageValueChange = (value: string) => {
+        setFilters((prev) => ({
+            ...prev,
+            page: value,
+        }))
+    }
+
+    const handleLimitValueChange = (value: string) => {
+        setFilters((prev) => ({
+            ...prev,
+            limit: value,
+            page: "1",
+        }))
     }
 
     const inventoryQuery = useQuery({
@@ -459,40 +475,13 @@ const InventoryDetail = () => {
                 </div>
             </div>
 
-            <div className="flex flex-row justify-end gap-2">
-                <button
-                    type="button"
-                    className="bg-neutral-800 p-1 rounded text-white cursor-pointer"
-                    onClick={() => changePage(-1)}
-                >
-                    <ChevronLeft />
-                </button>
-                <input
-                    id="page"
-                    placeholder="1"
-                    type="number"
-                    min={1}
-                    className="w-10 bg-neutral-200 rounded text-center"
-                    value={filters.page}
-                    onChange={handleFilterChange("page")}
-                />
-                <button
-                    type="button"
-                    className="bg-neutral-800 p-1 rounded text-white cursor-pointer"
-                    onClick={() => changePage(1)}
-                >
-                    <ChevronRight />
-                </button>
-                <input
-                    id="limit"
-                    placeholder="10"
-                    type="number"
-                    min={1}
-                    className="w-10 bg-neutral-200 rounded text-center"
-                    value={filters.limit}
-                    onChange={handleFilterChange("limit")}
-                />
-            </div>
+            <TablePagination
+                page={filters.page}
+                limit={filters.limit}
+                onPageChange={handlePageValueChange}
+                onLimitChange={handleLimitValueChange}
+                onDelta={changePage}
+            />
         </>
     )
 }

@@ -2,14 +2,9 @@ import { useState } from "react"
 import type { ChangeEvent } from "react"
 import Divider from "../components/Divider"
 import Input from "../components/Input"
+import { TablePagination } from "../components/Table"
 import InventoryTable from "../templates/InventoryTable"
-import {
-    Calendar,
-    ChevronLeft,
-    ChevronRight,
-    PackageSearch,
-    Tag,
-} from "lucide-react"
+import { Calendar, PackageSearch, Tag } from "lucide-react"
 import { useNavigate } from "@tanstack/react-router"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import * as Dialog from "@radix-ui/react-dialog"
@@ -105,6 +100,21 @@ const InventoryList = () => {
                 page: String(nextPage),
             }
         })
+    }
+
+    const handlePageValueChange = (value: string) => {
+        setFilters((prev) => ({
+            ...prev,
+            page: value,
+        }))
+    }
+
+    const handleLimitValueChange = (value: string) => {
+        setFilters((prev) => ({
+            ...prev,
+            limit: value,
+            page: "1",
+        }))
     }
 
     const handleImport = async () => {
@@ -422,40 +432,13 @@ const InventoryList = () => {
                 }
             />
 
-            <div className="flex flex-row justify-end gap-2">
-                <button
-                    type="button"
-                    className="bg-neutral-800 p-1 rounded text-white cursor-pointer"
-                    onClick={() => changePage(-1)}
-                >
-                    <ChevronLeft />
-                </button>
-                <input
-                    id="page"
-                    placeholder="1"
-                    type="number"
-                    min={1}
-                    className="w-10 bg-neutral-200 rounded text-center"
-                    value={filters.page}
-                    onChange={handleFilterChange("page")}
-                />
-                <button
-                    type="button"
-                    className="bg-neutral-800 p-1 rounded text-white cursor-pointer"
-                    onClick={() => changePage(1)}
-                >
-                    <ChevronRight />
-                </button>
-                <input
-                    id="limit"
-                    placeholder="10"
-                    type="number"
-                    min={1}
-                    className="w-10 bg-neutral-200 rounded text-center"
-                    value={filters.limit}
-                    onChange={handleFilterChange("limit")}
-                />
-            </div>
+            <TablePagination
+                page={filters.page}
+                limit={filters.limit}
+                onPageChange={handlePageValueChange}
+                onLimitChange={handleLimitValueChange}
+                onDelta={changePage}
+            />
         </>
     )
 }
