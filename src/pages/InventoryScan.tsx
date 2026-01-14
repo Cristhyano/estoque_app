@@ -237,7 +237,7 @@ const InventoryScan = () => {
 
             <Divider />
 
-            <form onSubmit={handleSubmit} className="max-w-md">
+            <form onSubmit={handleSubmit}>
                 <Input
                     ref={inputRef}
                     id="scan-code"
