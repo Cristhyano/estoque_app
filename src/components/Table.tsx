@@ -56,6 +56,7 @@ export const TableCell = ({ className, ...props }: TdHTMLAttributes<HTMLTableCel
 type TablePaginationProps = {
     page: string
     limit: string
+    maxPage?: number
     onPageChange: (value: string) => void
     onLimitChange: (value: string) => void
     onDelta?: (delta: number) => void
@@ -64,12 +65,29 @@ type TablePaginationProps = {
 export const TablePagination = ({
     page,
     limit,
+    maxPage,
     onPageChange,
     onLimitChange,
     onDelta,
 }: TablePaginationProps) => {
+    const pageNumber = Math.max(1, Number(page) || 1)
+    const effectiveMaxPage = maxPage && maxPage > 0 ? maxPage : undefined
     const handlePageChange = (event: ChangeEvent<HTMLInputElement>) => {
-        onPageChange(event.target.value)
+        const rawValue = event.target.value
+        if (rawValue.trim() === "") {
+            onPageChange(rawValue)
+            return
+        }
+        const numericValue = Number(rawValue)
+        if (!Number.isFinite(numericValue)) {
+            onPageChange(rawValue)
+            return
+        }
+        let nextValue = Math.max(1, Math.trunc(numericValue))
+        if (effectiveMaxPage) {
+            nextValue = Math.min(nextValue, effectiveMaxPage)
+        }
+        onPageChange(String(nextValue))
     }
 
     const handleLimitChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -82,7 +100,7 @@ export const TablePagination = ({
                 type="button"
                 className="bg-neutral-800 p-1 rounded text-white cursor-pointer"
                 onClick={() => onDelta?.(-1)}
-                disabled={!onDelta}
+                disabled={!onDelta || pageNumber <= 1}
             >
                 <ChevronLeft />
             </button>
@@ -91,6 +109,7 @@ export const TablePagination = ({
                 placeholder="1"
                 type="number"
                 min={1}
+                max={effectiveMaxPage}
                 className="w-10 bg-neutral-200 rounded text-center"
                 value={page}
                 onChange={handlePageChange}
@@ -99,7 +118,7 @@ export const TablePagination = ({
                 type="button"
                 className="bg-neutral-800 p-1 rounded text-white cursor-pointer"
                 onClick={() => onDelta?.(1)}
-                disabled={!onDelta}
+                disabled={!onDelta || (effectiveMaxPage ? pageNumber >= effectiveMaxPage : false)}
             >
                 <ChevronRight />
             </button>

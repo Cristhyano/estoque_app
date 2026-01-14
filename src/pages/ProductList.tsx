@@ -38,6 +38,7 @@ const ProductList = () => {
     const [importResult, setImportResult] = useState<{ created: number, updated: number, skipped: number } | null>(null)
     const [importInputKey, setImportInputKey] = useState(0)
     const [isDialogOpen, setIsDialogOpen] = useState(false)
+    const [paginationMeta, setPaginationMeta] = useState({ totalPages: 0, totalItems: 0 })
 
     const handleFilterChange = (key: keyof ProductFilters) =>
         (event: ChangeEvent<HTMLInputElement>) => {
@@ -62,7 +63,9 @@ const ProductList = () => {
     const changePage = (delta: number) => {
         setFilters((prev) => {
             const current = Number(prev.page) || 1
-            const nextPage = Math.max(1, current + delta)
+            const rawNext = current + delta
+            const maxPage = paginationMeta.totalPages > 0 ? paginationMeta.totalPages : undefined
+            const nextPage = maxPage ? Math.min(Math.max(1, rawNext), maxPage) : Math.max(1, rawNext)
             return {
                 ...prev,
                 page: String(nextPage),
@@ -266,11 +269,12 @@ const ProductList = () => {
                 />
             </form>
 
-            <ProductTable filters={filters} />
+            <ProductTable filters={filters} onMetaChange={setPaginationMeta} />
 
             <TablePagination
                 page={filters.page}
                 limit={filters.limit}
+                maxPage={paginationMeta.totalPages > 0 ? paginationMeta.totalPages : undefined}
                 onPageChange={handlePageValueChange}
                 onLimitChange={handleLimitValueChange}
                 onDelta={changePage}

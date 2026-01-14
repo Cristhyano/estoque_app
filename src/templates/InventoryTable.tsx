@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import {
     Table,
     TableBody,
@@ -40,6 +40,7 @@ type ProductInventoryItem = {
 type InventoryTableProps = {
     filters: InventoryFilters
     onSortChange: (next: { sort_by: string; sort_dir: string }) => void
+    onMetaChange?: (meta: { totalPages: number; totalItems: number }) => void
 }
 
 type PaginatedResponse<T> = {
@@ -69,7 +70,7 @@ const formatDateTime = (value?: string | null) => {
 
 const normalize = (value: string) => value.trim().toLowerCase()
 
-const InventoryTable = ({ filters, onSortChange }: InventoryTableProps) => {
+const InventoryTable = ({ filters, onSortChange, onMetaChange }: InventoryTableProps) => {
     const queryClient = useQueryClient()
     const [exportingId, setExportingId] = useState<string | null>(null)
 
@@ -175,6 +176,10 @@ const InventoryTable = ({ filters, onSortChange }: InventoryTableProps) => {
     const totalPages = hasPagination(inventoriesPayload)
         ? Number(inventoriesPayload.total_pages ?? 0)
         : 0
+
+    useEffect(() => {
+        onMetaChange?.({ totalPages, totalItems })
+    }, [onMetaChange, totalItems, totalPages])
 
     const handleSortClick = (nextSort: string) => {
         if (filters.sort_by === nextSort) {

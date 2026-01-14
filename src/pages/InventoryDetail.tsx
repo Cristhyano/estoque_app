@@ -109,7 +109,9 @@ const InventoryDetail = () => {
     const changePage = (delta: number) => {
         setFilters((prev) => {
             const current = Number(prev.page) || 1
-            const nextPage = Math.max(1, current + delta)
+            const rawNext = current + delta
+            const maxPage = totalPages > 0 ? totalPages : undefined
+            const nextPage = maxPage ? Math.min(Math.max(1, rawNext), maxPage) : Math.max(1, rawNext)
             return {
                 ...prev,
                 page: String(nextPage),
@@ -478,6 +480,7 @@ const InventoryDetail = () => {
             <TablePagination
                 page={filters.page}
                 limit={filters.limit}
+                maxPage={totalPages > 0 ? totalPages : undefined}
                 onPageChange={handlePageValueChange}
                 onLimitChange={handleLimitValueChange}
                 onDelta={changePage}

@@ -58,6 +58,7 @@ const InventoryList = () => {
     const [mergeStatus, setMergeStatus] = useState<string | null>(null)
     const [isMerging, setIsMerging] = useState(false)
     const [selectedImportInventoryId, setSelectedImportInventoryId] = useState("")
+    const [paginationMeta, setPaginationMeta] = useState({ totalPages: 0, totalItems: 0 })
 
     const { data: openInventories } = useQuery<InventoryPeriod[]>({
         queryKey: ["inventarios-open"],
@@ -94,7 +95,9 @@ const InventoryList = () => {
     const changePage = (delta: number) => {
         setFilters((prev) => {
             const current = Number(prev.page) || 1
-            const nextPage = Math.max(1, current + delta)
+            const rawNext = current + delta
+            const maxPage = paginationMeta.totalPages > 0 ? paginationMeta.totalPages : undefined
+            const nextPage = maxPage ? Math.min(Math.max(1, rawNext), maxPage) : Math.max(1, rawNext)
             return {
                 ...prev,
                 page: String(nextPage),
@@ -430,11 +433,13 @@ const InventoryList = () => {
                         sort_dir: next.sort_dir,
                     }))
                 }
+                onMetaChange={setPaginationMeta}
             />
 
             <TablePagination
                 page={filters.page}
                 limit={filters.limit}
+                maxPage={paginationMeta.totalPages > 0 ? paginationMeta.totalPages : undefined}
                 onPageChange={handlePageValueChange}
                 onLimitChange={handleLimitValueChange}
                 onDelta={changePage}

@@ -1,3 +1,4 @@
+import { useEffect } from "react"
 import {
     Table,
     TableBody,
@@ -22,6 +23,7 @@ type ProductFilters = {
 
 type ProductTableProps = {
     filters: ProductFilters
+    onMetaChange?: (meta: { totalPages: number; totalItems: number }) => void
 }
 
 const formatCurrency = (value: number) =>
@@ -30,7 +32,7 @@ const formatCurrency = (value: number) =>
         currency: "BRL",
     }).format(value)
 
-const ProductTable = ({ filters }: ProductTableProps) => {
+const ProductTable = ({ filters, onMetaChange }: ProductTableProps) => {
     const { isPending, error, data, isFetching } = useQuery({
         queryKey: ["products", filters],
         queryFn: async () => {
@@ -52,6 +54,12 @@ const ProductTable = ({ filters }: ProductTableProps) => {
     if (error) return "An error has occurred: " + error.message
 
     const rows = Array.isArray(data?.items) ? data?.items : []
+    const totalItems = Number(data?.total_items ?? rows.length)
+    const totalPages = Number(data?.total_pages ?? 0)
+
+    useEffect(() => {
+        onMetaChange?.({ totalPages, totalItems })
+    }, [onMetaChange, totalItems, totalPages])
 
     return (
         <div className="flex flex-col h-full overflow-hidden rounded">
