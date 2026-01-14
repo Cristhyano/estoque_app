@@ -9,6 +9,7 @@ const { parseInventoryPeriodInput, buildNextInventoryId } = require("../utils/in
 const { buildListResponse } = require("../utils/pagination");
 const ExcelJS = require("exceljs");
 const { aggregateInventoryItems } = require("../utils/inventoryAggregation");
+const MAX_INVENTORY_NAME = 100;
 
 function listInventarios(req, res) {
   const periods = readInventoryPeriods();
@@ -145,6 +146,37 @@ function updateInventario(req, res) {
   res.json(updated);
 }
 
+function updateInventarioNome(req, res) {
+  if (!Object.prototype.hasOwnProperty.call(req.body ?? {}, "nome")) {
+    return res.status(400).json({ error: "Nome nao informado" });
+  }
+
+  const nomeRaw = req.body.nome;
+  if (nomeRaw !== null && nomeRaw !== undefined && typeof nomeRaw !== "string") {
+    return res.status(400).json({ error: "Nome invalido" });
+  }
+
+  const trimmed = String(nomeRaw ?? "").trim();
+  if (trimmed && trimmed.length > MAX_INVENTORY_NAME) {
+    return res.status(400).json({ error: "Nome excede o limite" });
+  }
+
+  const periods = readInventoryPeriods();
+  const index = periods.findIndex((item) => item.id === req.params.id);
+  if (index === -1) {
+    return res.status(404).json({ error: "Inventario nao encontrado" });
+  }
+
+  const nextName = trimmed ? trimmed : null;
+  const updated = {
+    ...periods[index],
+    nome: nextName,
+  };
+  periods[index] = updated;
+  writeInventoryPeriods(periods);
+  res.json(updated);
+}
+
 function deleteInventario(req, res) {
   const periods = readInventoryPeriods();
   const index = periods.findIndex((item) => item.id === req.params.id);
@@ -197,16 +229,30 @@ async function exportInventario(req, res) {
   const workbook = new ExcelJS.Workbook();
   const worksheet = workbook.addWorksheet("Inventario");
   worksheet.columns = [
-    { header: "COD", key: "codigo", width: 12 },
-    { header: "DESCRICAO", key: "descricao", width: 40 },
-    { header: "PRECO UNITARIO", key: "preco_unitario", width: 16 },
-    { header: "QTD SISTEMA", key: "qtd_sistema", width: 14 },
-    { header: "QTD CONFERIDA", key: "qtd_conferida", width: 16 },
-    { header: "AJUSTE", key: "ajuste", width: 10 },
-    { header: "VALOR SISTEMA", key: "valor_sistema", width: 16 },
-    { header: "VALOR CONFERIDO", key: "valor_conferido", width: 18 },
-    { header: "DIFERENCA (R$)", key: "diferenca", width: 16 },
+    { key: "codigo", width: 12 },
+    { key: "descricao", width: 40 },
+    { key: "preco_unitario", width: 16 },
+    { key: "qtd_sistema", width: 14 },
+    { key: "qtd_conferida", width: 16 },
+    { key: "ajuste", width: 10 },
+    { key: "valor_sistema", width: 16 },
+    { key: "valor_conferido", width: 18 },
+    { key: "diferenca", width: 16 },
   ];
+  const inventoryName = period.nome ? String(period.nome) : "Inventario sem nome";
+  worksheet.addRow(["Inventario", inventoryName]);
+  worksheet.addRow([]);
+  worksheet.addRow([
+    "COD",
+    "DESCRICAO",
+    "PRECO UNITARIO",
+    "QTD SISTEMA",
+    "QTD CONFERIDA",
+    "AJUSTE",
+    "VALOR SISTEMA",
+    "VALOR CONFERIDO",
+    "DIFERENCA (R$)",
+  ]);
 
   const productsById = new Map(
     products.map((item) => [item.codigo || item.codigo_barras || "", item])
@@ -254,6 +300,7 @@ module.exports = {
   getInventario,
   createInventario,
   updateInventario,
+  updateInventarioNome,
   deleteInventario,
   closeOpenInventario,
   exportInventario,

@@ -10,7 +10,7 @@ function parseInventoryPeriodInput(body) {
   const status = String(statusRaw).trim().toLowerCase();
 
   const errors = [];
-  if (!nome) errors.push("nome");
+  if (nome && nome.length > 100) errors.push("nome");
   if (!inicio) errors.push("inicio");
   if (status && !["aberto", "fechado"].includes(status)) errors.push("status");
 
@@ -41,7 +41,7 @@ function parseInventoryPeriodInput(body) {
   return {
     errors,
     period: {
-      nome,
+      nome: nome || null,
       inicio: inicioIso,
       fim: fimIso,
       status: status || (fimIso ? "fechado" : "aberto"),

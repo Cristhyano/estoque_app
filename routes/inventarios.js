@@ -4,6 +4,7 @@ const {
   getInventario,
   createInventario,
   updateInventario,
+  updateInventarioNome,
   deleteInventario,
   closeOpenInventario,
   exportInventario,
@@ -160,6 +161,7 @@ router.post("/", createInventario);
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
+router.put("/:id/nome", updateInventarioNome);
 router.put("/:id", updateInventario);
 /**
  * @swagger
