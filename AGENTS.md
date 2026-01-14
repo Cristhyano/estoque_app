@@ -24,7 +24,8 @@
 - `src/templates/ProductTable.tsx`: usa React Query, scroll apenas no corpo da tabela, header e footer fixos (sticky).
 - `src/templates/ProductTable.tsx`: formata moeda com `Intl.NumberFormat("pt-BR")`.
 - `src/components/Input.tsx`: aceita `icon` como `ReactNode` ou `ElementType`.
-- Navegacao simples: caminho contendo `/scan` renderiza a tela de leitura.
+- Rotas com TanStack Router: `/` (lista de produtos) e `/scan` (leitura por scanner).
+- Navegacao: botao na lista de produtos abre a tela de leitura.
 
 ## API e filtros disponiveis
 Endpoint: `GET /products`

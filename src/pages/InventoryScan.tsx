@@ -162,6 +162,31 @@ const InventoryScan = () => {
         },
     })
 
+    const closeMutation = useMutation({
+        mutationFn: async () => {
+            const response = await fetch("http://localhost:3001/inventarios/aberto/fechar", {
+                method: "PATCH",
+            })
+            if (!response.ok) {
+                const errorBody = await response.json().catch(() => ({}))
+                const errorMessage =
+                    errorBody?.error || "Erro ao finalizar inventario"
+                throw new Error(errorMessage)
+            }
+            return await response.json()
+        },
+        onSuccess: () => {
+            setMessage({ type: "success", text: "Inventario finalizado" })
+            queryClient.invalidateQueries({ queryKey: ["produto-inventario-open"] })
+        },
+        onError: (err: Error) => {
+            setMessage({ type: "error", text: err.message })
+        },
+        onSettled: () => {
+            inputRef.current?.focus()
+        },
+    })
+
     useEffect(() => {
         inputRef.current?.focus()
         return () => {
@@ -180,7 +205,7 @@ const InventoryScan = () => {
     const handleSubmit = (event: FormEvent) => {
         event.preventDefault()
         const trimmed = code.trim()
-        if (!trimmed || mutation.isPending) return
+        if (!trimmed || mutation.isPending || closeMutation.isPending) return
         const now = Date.now()
         if (
             lastReadRef.current.code === trimmed &&
@@ -200,6 +225,14 @@ const InventoryScan = () => {
         <main className="flex flex-col gap-4 h-screen p-4 bg-neutral-100 overflow-hidden">
             <header className="flex flex-row justify-between">
                 <h1 className="text-2xl font-semibold">Leitura de produtos</h1>
+                <button
+                    type="button"
+                    className="bg-neutral-800 px-2 rounded text-white flex flex-row items-center gap-2 cursor-pointer"
+                    onClick={() => closeMutation.mutate()}
+                    disabled={closeMutation.isPending}
+                >
+                    Finalizar inventario
+                </button>
             </header>
 
             <Divider />
@@ -220,7 +253,7 @@ const InventoryScan = () => {
                             window.setTimeout(() => inputRef.current?.focus(), 0)
                         }
                     }}
-                    disabled={mutation.isPending}
+                    disabled={mutation.isPending || closeMutation.isPending}
                 />
             </form>
 

@@ -5,6 +5,7 @@ import Input from "../components/Input"
 import ProductTable from "../templates/ProductTable"
 import { ArrowDown, ArrowUp, BanknoteArrowDown, BanknoteArrowUp, Barcode, ChevronLeft, ChevronRight, Text, Upload } from "lucide-react"
 import { useQueryClient } from "@tanstack/react-query"
+import { Link } from "@tanstack/react-router"
 import * as Dialog from "@radix-ui/react-dialog"
 
 type ProductFilters = {
@@ -113,6 +114,12 @@ const ProductList = () => {
             <header className="flex flex-row justify-between">
                 <h1 className="text-2xl font-semibold">Estoque atual</h1>
                 <div className="flex flex-row gap-4">
+                    <Link
+                        to="/scan"
+                        className="bg-neutral-800 px-2 rounded text-white flex flex-row items-center gap-2 cursor-pointer"
+                    >
+                        Inventario
+                    </Link>
                     <Dialog.Root open={isDialogOpen} onOpenChange={handleDialogOpenChange}>
                         <Dialog.Trigger asChild>
                             <button

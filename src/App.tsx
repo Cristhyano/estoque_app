@@ -1,20 +1,13 @@
-import ProductList from "./pages/ProductList"
-import InventoryScan from "./pages/InventoryScan"
-
-import {
-    QueryClient,
-    QueryClientProvider,
-} from "@tanstack/react-query"
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+import { RouterProvider } from "@tanstack/react-router"
+import { router } from "./router"
 
 const queryClient = new QueryClient()
 
 function App() {
-    const path =
-        typeof window !== "undefined" ? window.location.pathname.toLowerCase() : "/"
-    const Screen = path.includes("scan") ? InventoryScan : ProductList
     return (
         <QueryClientProvider client={queryClient}>
-            <Screen />
+            <RouterProvider router={router} />
         </QueryClientProvider>
     )
 }
