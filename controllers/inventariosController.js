@@ -406,6 +406,32 @@ function closeOpenInventario(req, res) {
   res.json(updated);
 }
 
+function closeInventario(req, res) {
+  const inventoryId = String(req.params.id ?? "").trim();
+  if (!inventoryId) {
+    return res.status(400).json({ error: "Inventario invalido" });
+  }
+
+  const periods = readInventoryPeriods();
+  const index = periods.findIndex((item) => item.id === inventoryId);
+  if (index === -1) {
+    return res.status(404).json({ error: "Inventario nao encontrado" });
+  }
+  if (periods[index].status !== "aberto") {
+    return res.status(400).json({ error: "Inventario fechado" });
+  }
+
+  const now = new Date().toISOString();
+  const updated = {
+    ...periods[index],
+    status: "fechado",
+    fim: now,
+  };
+  periods[index] = updated;
+  writeInventoryPeriods(periods);
+  res.json(updated);
+}
+
 function mergeInventarios(req, res) {
   const fromId = String(req.body?.fromInventarioId ?? "").trim();
   const toId = String(req.body?.toInventarioId ?? "").trim();
@@ -544,6 +570,7 @@ module.exports = {
   importInventarioXlsx,
   mergeInventarios,
   deleteInventario,
+  closeInventario,
   closeOpenInventario,
   exportInventario,
 };

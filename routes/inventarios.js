@@ -9,6 +9,7 @@ const {
   mergeInventarios,
   deleteInventario,
   closeOpenInventario,
+  closeInventario,
   exportInventario,
 } = require("../controllers/inventariosController");
 const multer = require("multer");
@@ -82,6 +83,7 @@ router.get("/", listInventarios);
  *               $ref: '#/components/schemas/ErrorResponse'
  */
 router.get("/:id/export", exportInventario);
+router.patch("/:id/fechar", closeInventario);
 router.get("/:id", getInventario);
 router.post("/import", upload.single("file"), importInventarioXlsx);
 router.post("/merge", mergeInventarios);
