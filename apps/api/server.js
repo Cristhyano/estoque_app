@@ -14,9 +14,25 @@ const { initStorage } = require("./utils/storage");
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+const allowedOriginPatterns = [/^http:\/\/localhost:\d+$/];
+
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: (origin, callback) => {
+      if (!origin) {
+        callback(null, true);
+        return;
+      }
+      if (allowedOriginPatterns.some((pattern) => pattern.test(origin))) {
+        callback(null, true);
+        return;
+      }
+      if (origin.startsWith("app://") || origin === "file://") {
+        callback(null, true);
+        return;
+      }
+      callback(new Error("Not allowed by CORS"));
+    },
   })
 );
 app.use(express.json());

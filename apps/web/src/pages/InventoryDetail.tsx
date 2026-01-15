@@ -15,6 +15,7 @@ import {
     TablePagination,
 } from "../components/Table"
 import { Barcode, PackageSearch } from "lucide-react"
+import { apiBaseUrl } from "../config"
 
 type InventoryPeriod = {
     id: string
@@ -138,7 +139,7 @@ const InventoryDetail = () => {
     const inventoryQuery = useQuery({
         queryKey: ["inventarios", id],
         queryFn: async () => {
-            const response = await fetch(`http://localhost:3001/inventarios/${id}`)
+            const response = await fetch(`${apiBaseUrl}/inventarios/${id}`)
             if (!response.ok) {
                 throw new Error("Falha ao carregar inventario")
             }
@@ -149,7 +150,7 @@ const InventoryDetail = () => {
     const productInventoryQuery = useQuery({
         queryKey: ["produto-inventario", id],
         queryFn: async () => {
-            const response = await fetch("http://localhost:3001/produto-inventario")
+            const response = await fetch(`${apiBaseUrl}/produto-inventario`)
             if (!response.ok) {
                 throw new Error("Falha ao carregar itens do inventario")
             }
@@ -160,7 +161,7 @@ const InventoryDetail = () => {
     const productsQuery = useQuery({
         queryKey: ["products", "all"],
         queryFn: async () => {
-            const response = await fetch("http://localhost:3001/products")
+            const response = await fetch(`${apiBaseUrl}/products`)
             if (!response.ok) {
                 throw new Error("Falha ao carregar produtos")
             }
@@ -182,7 +183,7 @@ const InventoryDetail = () => {
 
     const updateNameMutation = useMutation({
         mutationFn: async (nextName: string | null) => {
-            const response = await fetch(`http://localhost:3001/inventarios/${id}/nome`, {
+            const response = await fetch(`${apiBaseUrl}/inventarios/${id}/nome`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",

@@ -5,7 +5,10 @@ const db = require("./db");
 const { runMigrations } = require("./migrations");
 
 const baseDir = path.join(__dirname, "..");
-const dataDir = path.join(baseDir, "data");
+const defaultSeedDir = path.join(baseDir, "data");
+const dataDir = process.env.ESTOQUE_DATA_DIR
+  ? path.resolve(process.env.ESTOQUE_DATA_DIR)
+  : defaultSeedDir;
 const dataFile = path.join(dataDir, "products.json");
 const configFile = path.join(dataDir, "config.json");
 const inventoryPeriodsFile = path.join(dataDir, "inventarios.json");
@@ -13,9 +16,13 @@ const productInventoryFile = path.join(dataDir, "produto_inventario.json");
 
 let initialized = false;
 
-function readJsonFile(filePath, fallback) {
-  if (!fs.existsSync(filePath)) return fallback;
-  const raw = fs.readFileSync(filePath, "utf8");
+function readJsonFile(filePath, fallback, seedFallbackPath) {
+  let targetPath = filePath;
+  if (!fs.existsSync(targetPath) && seedFallbackPath && fs.existsSync(seedFallbackPath)) {
+    targetPath = seedFallbackPath;
+  }
+  if (!fs.existsSync(targetPath)) return fallback;
+  const raw = fs.readFileSync(targetPath, "utf8");
   try {
     const data = JSON.parse(raw);
     return data ?? fallback;
@@ -34,7 +41,11 @@ function initStorage() {
 function seedFromJson() {
   const productCount = db.prepare("SELECT COUNT(*) as total FROM products").get().total;
   if (productCount === 0) {
-    const products = readJsonFile(dataFile, []);
+    const products = readJsonFile(
+      dataFile,
+      [],
+      path.join(defaultSeedDir, "products.json")
+    );
     if (Array.isArray(products) && products.length > 0) {
       const insert = db.prepare(
         "INSERT INTO products (codigo, codigo_barras, nome, quantidade, preco_unitario) VALUES (?, ?, ?, ?, ?)"
@@ -56,7 +67,11 @@ function seedFromJson() {
 
   const inventoryCount = db.prepare("SELECT COUNT(*) as total FROM inventarios").get().total;
   if (inventoryCount === 0) {
-    const periods = readJsonFile(inventoryPeriodsFile, []);
+    const periods = readJsonFile(
+      inventoryPeriodsFile,
+      [],
+      path.join(defaultSeedDir, "inventarios.json")
+    );
     if (Array.isArray(periods) && periods.length > 0) {
       const insert = db.prepare(
         "INSERT INTO inventarios (id, nome, inicio, fim, status) VALUES (?, ?, ?, ?, ?)"
@@ -78,7 +93,11 @@ function seedFromJson() {
 
   const readsCount = db.prepare("SELECT COUNT(*) as total FROM produto_inventario").get().total;
   if (readsCount === 0) {
-    const reads = readJsonFile(productInventoryFile, []);
+    const reads = readJsonFile(
+      productInventoryFile,
+      [],
+      path.join(defaultSeedDir, "produto_inventario.json")
+    );
     if (Array.isArray(reads) && reads.length > 0) {
       const insert = db.prepare(
         "INSERT INTO produto_inventario (id, id_produto, id_inventario, quantidade, created_at, last_read, qtd_sistema, preco_unitario) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
@@ -103,7 +122,11 @@ function seedFromJson() {
 
   const configRow = db.prepare("SELECT value FROM config WHERE key = 'fator_conversao'").get();
   if (!configRow) {
-    const configData = readJsonFile(configFile, {});
+    const configData = readJsonFile(
+      configFile,
+      {},
+      path.join(defaultSeedDir, "config.json")
+    );
     const value = Number(configData?.fator_conversao ?? 100);
     db.prepare("INSERT INTO config (key, value) VALUES ('fator_conversao', ?)").run(
       String(Number.isFinite(value) && value > 0 ? value : 100)

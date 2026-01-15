@@ -9,6 +9,7 @@ import {
     TableRow,
 } from "../components/Table"
 import { useQuery } from "@tanstack/react-query"
+import { apiBaseUrl } from "../config"
 
 type ProductFilters = {
     codigo: string
@@ -44,8 +45,8 @@ const ProductTable = ({ filters, onMetaChange }: ProductTableProps) => {
             })
             const queryString = searchParams.toString()
             const url = queryString
-                ? `http://localhost:3001/products?${queryString}`
-                : "http://localhost:3001/products"
+                ? `${apiBaseUrl}/products?${queryString}`
+                : `${apiBaseUrl}/products`
             const response = await fetch(url)
             return await response.json()
         },

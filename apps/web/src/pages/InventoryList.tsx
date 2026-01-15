@@ -8,6 +8,7 @@ import { Calendar, PackageSearch, Tag } from "lucide-react"
 import { useNavigate } from "@tanstack/react-router"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import * as Dialog from "@radix-ui/react-dialog"
+import { apiBaseUrl } from "../config"
 
 type InventoryFilters = {
     status: string
@@ -63,7 +64,7 @@ const InventoryList = () => {
     const { data: openInventories } = useQuery<InventoryPeriod[]>({
         queryKey: ["inventarios-open"],
         queryFn: async () => {
-            const response = await fetch("http://localhost:3001/inventarios?status=aberto&limit=200")
+            const response = await fetch(`${apiBaseUrl}/inventarios?status=aberto&limit=200`)
             if (!response.ok) {
                 throw new Error("Falha ao carregar inventarios")
             }
@@ -131,7 +132,7 @@ const InventoryList = () => {
             if (selectedImportInventoryId) {
                 formData.append("inventario_id", selectedImportInventoryId)
             }
-            const response = await fetch("http://localhost:3001/inventarios/import", {
+            const response = await fetch(`${apiBaseUrl}/inventarios/import`, {
                 method: "POST",
                 body: formData,
             })
@@ -178,7 +179,7 @@ const InventoryList = () => {
         setIsMerging(true)
         setMergeStatus(null)
         try {
-            const response = await fetch("http://localhost:3001/inventarios/merge", {
+            const response = await fetch(`${apiBaseUrl}/inventarios/merge`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

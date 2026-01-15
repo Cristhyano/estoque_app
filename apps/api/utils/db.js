@@ -2,7 +2,9 @@
 const fs = require("fs");
 const Database = require("better-sqlite3");
 
-const dataDir = path.join(__dirname, "..", "data");
+const dataDir = process.env.ESTOQUE_DATA_DIR
+  ? path.resolve(process.env.ESTOQUE_DATA_DIR)
+  : path.join(__dirname, "..", "data");
 const dbPath = path.join(dataDir, "estoque.sqlite");
 
 if (!fs.existsSync(dataDir)) {

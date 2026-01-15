@@ -10,6 +10,7 @@ import {
 } from "../components/Table"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { Link } from "@tanstack/react-router"
+import { apiBaseUrl } from "../config"
 
 type InventoryFilters = {
     status: string
@@ -85,8 +86,8 @@ const InventoryTable = ({ filters, onSortChange, onMetaChange }: InventoryTableP
             })
             const queryString = searchParams.toString()
             const url = queryString
-                ? `http://localhost:3001/inventarios?${queryString}`
-                : "http://localhost:3001/inventarios"
+                ? `${apiBaseUrl}/inventarios?${queryString}`
+                : `${apiBaseUrl}/inventarios`
             const response = await fetch(url)
             if (!response.ok) {
                 throw new Error("Falha ao carregar inventarios")
@@ -98,7 +99,7 @@ const InventoryTable = ({ filters, onSortChange, onMetaChange }: InventoryTableP
     const productInventoryQuery = useQuery({
         queryKey: ["produto-inventario"],
         queryFn: async () => {
-            const response = await fetch("http://localhost:3001/produto-inventario")
+            const response = await fetch(`${apiBaseUrl}/produto-inventario`)
             if (!response.ok) {
                 throw new Error("Falha ao carregar itens do inventario")
             }
@@ -108,7 +109,7 @@ const InventoryTable = ({ filters, onSortChange, onMetaChange }: InventoryTableP
 
     const closeMutation = useMutation({
         mutationFn: async (inventoryId: string) => {
-            const response = await fetch(`http://localhost:3001/inventarios/${inventoryId}/fechar`, {
+            const response = await fetch(`${apiBaseUrl}/inventarios/${inventoryId}/fechar`, {
                 method: "PATCH",
             })
             if (!response.ok) {
@@ -125,7 +126,7 @@ const InventoryTable = ({ filters, onSortChange, onMetaChange }: InventoryTableP
 
     const reopenMutation = useMutation({
         mutationFn: async (payload: InventoryPeriod) => {
-            const response = await fetch(`http://localhost:3001/inventarios/${payload.id}`, {
+            const response = await fetch(`${apiBaseUrl}/inventarios/${payload.id}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
@@ -197,7 +198,7 @@ const InventoryTable = ({ filters, onSortChange, onMetaChange }: InventoryTableP
         if (exportingId) return
         setExportingId(inventoryId)
         try {
-            const response = await fetch(`http://localhost:3001/inventarios/${inventoryId}/export`)
+            const response = await fetch(`${apiBaseUrl}/inventarios/${inventoryId}/export`)
             if (!response.ok) {
                 const errorBody = await response.json().catch(() => ({}))
                 const errorMessage = errorBody?.error || "Falha ao exportar inventario"

@@ -11,6 +11,7 @@ import {
     TableRow,
 } from "../components/Table"
 import { Barcode } from "lucide-react"
+import { apiBaseUrl } from "../config"
 
 type ProdutoInventarioItem = {
     id_produto: string
@@ -115,7 +116,7 @@ const InventoryScan = () => {
         queryKey: inventoryQueryKey,
         queryFn: async () => {
             const query = selectedInventoryId ? `?inventario_id=${selectedInventoryId}` : ""
-            const response = await fetch(`http://localhost:3001/produto-inventario/aberto${query}`)
+            const response = await fetch(`${apiBaseUrl}/produto-inventario/aberto${query}`)
             if (!response.ok) {
                 throw new Error("Falha ao carregar leituras")
             }
@@ -126,7 +127,7 @@ const InventoryScan = () => {
     const { data: openInventories } = useQuery<InventoryPeriod[]>({
         queryKey: ["inventarios-open"],
         queryFn: async () => {
-            const response = await fetch("http://localhost:3001/inventarios?status=aberto&limit=200")
+            const response = await fetch(`${apiBaseUrl}/inventarios?status=aberto&limit=200`)
             if (!response.ok) {
                 throw new Error("Falha ao carregar inventarios")
             }
@@ -154,7 +155,7 @@ const InventoryScan = () => {
 
     const mutation = useMutation({
         mutationFn: async (payload: { codigo: string }) => {
-            const response = await fetch("http://localhost:3001/produto-inventario", {
+            const response = await fetch(`${apiBaseUrl}/produto-inventario`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -239,7 +240,7 @@ const InventoryScan = () => {
             }
             const query = searchParams.toString()
             const response = await fetch(
-                `http://localhost:3001/leituras/${payload.id}${query ? `?${query}` : ""}`,
+                `${apiBaseUrl}/leituras/${payload.id}${query ? `?${query}` : ""}`,
                 { method: "DELETE" }
             )
             if (!response.ok) {
@@ -267,7 +268,7 @@ const InventoryScan = () => {
             if (!inventoryId) {
                 throw new Error("Inventario nao encontrado")
             }
-            const response = await fetch(`http://localhost:3001/inventarios/${inventoryId}/fechar`, {
+            const response = await fetch(`${apiBaseUrl}/inventarios/${inventoryId}/fechar`, {
                 method: "PATCH",
             })
             if (!response.ok) {

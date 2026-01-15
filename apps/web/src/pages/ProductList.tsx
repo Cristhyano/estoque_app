@@ -7,6 +7,7 @@ import ProductTable from "../templates/ProductTable"
 import { ArrowDown, ArrowUp, BanknoteArrowDown, BanknoteArrowUp, Barcode, Text, Upload } from "lucide-react"
 import { useQueryClient } from "@tanstack/react-query"
 import * as Dialog from "@radix-ui/react-dialog"
+import { apiBaseUrl } from "../config"
 
 type ProductFilters = {
     codigo: string
@@ -95,7 +96,7 @@ const ProductList = () => {
         try {
             const formData = new FormData()
             formData.append("file", importFile)
-            const response = await fetch("http://localhost:3001/import", {
+            const response = await fetch(`${apiBaseUrl}/import`, {
                 method: "POST",
                 body: formData,
             })

@@ -1,4 +1,5 @@
 ﻿const path = require("path");
+const net = require("net");
 const { app, BrowserWindow, shell } = require("electron");
 const { spawn } = require("child_process");
 
@@ -7,6 +8,35 @@ let apiProcess;
 
 const useDevServer = process.argv.includes("--dev") && process.env.USE_VITE_DEV_SERVER !== "0";
 
+function resolveApiPort() {
+  const raw = Number(process.env.ESTOQUE_API_PORT || 3001);
+  return Number.isFinite(raw) && raw > 0 ? raw : 3001;
+}
+
+function resolveApiBaseUrl(apiPort) {
+  return (
+    process.env.ESTOQUE_API_BASE_URL ||
+    (process.env.ESTOQUE_API_MODE === "remote"
+      ? "https://comthy.com/estoque/api"
+      : `http://localhost:${apiPort}`)
+  );
+}
+
+function shouldStartLocalApi(apiUrl) {
+  return apiUrl.startsWith("http://localhost");
+}
+
+function isPortFree(port) {
+  return new Promise((resolve) => {
+    const server = net.createServer();
+    server.once("error", () => resolve(false));
+    server.once("listening", () => {
+      server.close(() => resolve(true));
+    });
+    server.listen(port, "127.0.0.1");
+  });
+}
+
 function getApiEntryPath() {
   if (app.isPackaged) {
     return path.join(process.resourcesPath, "api", "server.js");
@@ -14,22 +44,37 @@ function getApiEntryPath() {
   return path.join(__dirname, "..", "..", "api", "server.js");
 }
 
-function startApi() {
+async function startApi() {
+  const apiPort = resolveApiPort();
+  const apiBaseUrl = resolveApiBaseUrl(apiPort);
+  process.env.ESTOQUE_API_PORT = String(apiPort);
+  process.env.ESTOQUE_API_BASE_URL = apiBaseUrl;
+
+  if (!shouldStartLocalApi(apiBaseUrl)) {
+    return;
+  }
   if (process.env.START_LOCAL_API === "0") {
     return;
   }
   if (apiProcess) return;
+
+  const portFree = await isPortFree(apiPort);
+  if (!portFree) {
+    return;
+  }
+
   const apiEntry = getApiEntryPath();
-  const nodePath = app.isPackaged
-    ? path.join(process.resourcesPath, "node_modules")
-    : path.join(__dirname, "..", "..", "..", "node_modules");
+  const env = {
+    ...process.env,
+    PORT: String(apiPort),
+    ELECTRON_RUN_AS_NODE: "1",
+  };
+  if (app.isPackaged) {
+    env.ESTOQUE_DATA_DIR = path.join(app.getPath("userData"), "data");
+  }
 
   apiProcess = spawn(process.execPath, [apiEntry], {
-    env: {
-      ...process.env,
-      PORT: process.env.API_PORT || "3001",
-      NODE_PATH: nodePath,
-    },
+    env,
     stdio: "ignore",
     windowsHide: true,
   });
@@ -83,8 +128,8 @@ function createWindow() {
   });
 }
 
-app.whenReady().then(() => {
-  startApi();
+app.whenReady().then(async () => {
+  await startApi();
   createWindow();
 });
 
@@ -99,4 +144,8 @@ app.on("activate", () => {
   if (BrowserWindow.getAllWindows().length === 0) {
     createWindow();
   }
+});
+
+app.on("before-quit", () => {
+  stopApi();
 });
