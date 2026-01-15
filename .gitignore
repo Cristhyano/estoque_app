@@ -3,5 +3,6 @@ apps/**/node_modules/
 apps/**/dist/
 apps/**/release/
 apps/**/.env*
+apps/**/data/*.sqlite
 .DS_Store
 Thumbs.db
