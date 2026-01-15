@@ -25,6 +25,13 @@ set START_LOCAL_API=0
 npm run dev
 ```
 
+Para testar usando o build (sem Vite):
+
+```bash
+npm --prefix ../web run build
+npm run start
+```
+
 ## Build/Distribuicao
 
 1) Gere o build do front:

@@ -5,7 +5,7 @@ const { spawn } = require("child_process");
 let mainWindow;
 let apiProcess;
 
-const isDev = !app.isPackaged || process.argv.includes("--dev");
+const useDevServer = process.argv.includes("--dev") && process.env.USE_VITE_DEV_SERVER !== "0";
 
 function getApiEntryPath() {
   if (app.isPackaged) {
@@ -69,7 +69,7 @@ function createWindow() {
     mainWindow.show();
   });
 
-  if (isDev) {
+  if (useDevServer) {
     const devUrl = process.env.VITE_DEV_SERVER_URL || "http://localhost:5173";
     mainWindow.loadURL(devUrl);
     mainWindow.webContents.openDevTools({ mode: "detach" });
