@@ -6,7 +6,6 @@ import {
     Table,
     TableBody,
     TableCell,
-    TableFooter,
     TableHead,
     TableHeader,
     TableRow,
@@ -337,11 +336,6 @@ const InventoryScan = () => {
 
     const items = data?.items ?? []
     const recentReads = data?.recent_reads ?? []
-    const totalQuantidade = items.reduce(
-        (sum, item) => sum + Number(item.qtd_conferida ?? item.quantidade ?? 0),
-        0
-    )
-
     return (
         <>
             <header className="flex flex-row justify-between">

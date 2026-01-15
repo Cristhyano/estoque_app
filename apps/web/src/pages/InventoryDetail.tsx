@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import type { ChangeEvent } from "react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { Link, useParams } from "@tanstack/react-router"
+import { useParams } from "@tanstack/react-router"
 import Divider from "../components/Divider"
 import Input from "../components/Input"
 import {
@@ -42,6 +42,7 @@ type Product = {
     codigo?: string
     codigo_barras?: string
     nome?: string
+    quantidade?: number
 }
 
 type DetailFilters = {

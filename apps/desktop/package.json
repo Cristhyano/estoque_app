@@ -1,4 +1,4 @@
-﻿{
+{
   "name": "estoque_desktop",
   "private": true,
   "version": "0.1.0",
@@ -11,7 +11,7 @@
     "dist": "electron-builder"
   },
   "devDependencies": {
-    "electron": "^30.0.9",
+    "electron": "30.0.9",
     "electron-builder": "^24.13.3"
   },
   "build": {

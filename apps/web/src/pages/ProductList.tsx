@@ -6,7 +6,6 @@ import { TablePagination } from "../components/Table"
 import ProductTable from "../templates/ProductTable"
 import { ArrowDown, ArrowUp, BanknoteArrowDown, BanknoteArrowUp, Barcode, Text, Upload } from "lucide-react"
 import { useQueryClient } from "@tanstack/react-query"
-import { Link } from "@tanstack/react-router"
 import * as Dialog from "@radix-ui/react-dialog"
 
 type ProductFilters = {
