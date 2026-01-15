@@ -1,0 +1,16 @@
+﻿{
+  "name": "estoque",
+  "private": true,
+  "workspaces": [
+    "apps/web",
+    "apps/desktop",
+    "apps/api"
+  ],
+  "scripts": {
+    "dev:web": "npm --workspace apps/web run dev",
+    "dev:desktop": "npm --workspace apps/desktop run dev",
+    "dev:api": "npm --workspace apps/api run dev",
+    "build:web": "npm --workspace apps/web run build",
+    "build:desktop": "npm --workspace apps/desktop run build:ui && npm --workspace apps/desktop run dist"
+  }
+}

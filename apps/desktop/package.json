@@ -1,0 +1,39 @@
+﻿{
+  "name": "estoque_desktop",
+  "private": true,
+  "version": "0.1.0",
+  "main": "src/main.js",
+  "scripts": {
+    "build:ui": "npm --prefix ../web run build",
+    "dev": "electron . --dev",
+    "start": "electron .",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder"
+  },
+  "devDependencies": {
+    "electron": "^30.0.9",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.estoque.app",
+    "productName": "Estoque",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "src/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": "../web/dist",
+        "to": "dist"
+      }
+    ],
+    "win": {
+      "target": [
+        "nsis"
+      ]
+    }
+  }
+}
+
