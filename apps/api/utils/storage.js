@@ -1,5 +1,8 @@
-const fs = require("fs");
+﻿const fs = require("fs");
 const path = require("path");
+const { randomUUID } = require("crypto");
+const db = require("./db");
+const { runMigrations } = require("./migrations");
 
 const baseDir = path.join(__dirname, "..");
 const dataDir = path.join(baseDir, "data");
@@ -8,101 +11,208 @@ const configFile = path.join(dataDir, "config.json");
 const inventoryPeriodsFile = path.join(dataDir, "inventarios.json");
 const productInventoryFile = path.join(dataDir, "produto_inventario.json");
 
-function ensureDataFile() {
-  if (!fs.existsSync(dataDir)) {
-    fs.mkdirSync(dataDir, { recursive: true });
+let initialized = false;
+
+function readJsonFile(filePath, fallback) {
+  if (!fs.existsSync(filePath)) return fallback;
+  const raw = fs.readFileSync(filePath, "utf8");
+  try {
+    const data = JSON.parse(raw);
+    return data ?? fallback;
+  } catch {
+    return fallback;
   }
-  if (!fs.existsSync(dataFile)) {
-    fs.writeFileSync(dataFile, "[]", "utf8");
+}
+
+function initStorage() {
+  if (initialized) return;
+  runMigrations();
+  seedFromJson();
+  initialized = true;
+}
+
+function seedFromJson() {
+  const productCount = db.prepare("SELECT COUNT(*) as total FROM products").get().total;
+  if (productCount === 0) {
+    const products = readJsonFile(dataFile, []);
+    if (Array.isArray(products) && products.length > 0) {
+      const insert = db.prepare(
+        "INSERT INTO products (codigo, codigo_barras, nome, quantidade, preco_unitario) VALUES (?, ?, ?, ?, ?)"
+      );
+      const transaction = db.transaction((rows) => {
+        rows.forEach((item) => {
+          insert.run(
+            String(item.codigo ?? ""),
+            String(item.codigo_barras ?? ""),
+            String(item.nome ?? ""),
+            Number(item.quantidade ?? 0),
+            Number(item.preco_unitario ?? 0)
+          );
+        });
+      });
+      transaction(products);
+    }
   }
-  if (!fs.existsSync(configFile)) {
-    fs.writeFileSync(
-      configFile,
-      JSON.stringify({ fator_conversao: 100 }, null, 2),
-      "utf8"
+
+  const inventoryCount = db.prepare("SELECT COUNT(*) as total FROM inventarios").get().total;
+  if (inventoryCount === 0) {
+    const periods = readJsonFile(inventoryPeriodsFile, []);
+    if (Array.isArray(periods) && periods.length > 0) {
+      const insert = db.prepare(
+        "INSERT INTO inventarios (id, nome, inicio, fim, status) VALUES (?, ?, ?, ?, ?)"
+      );
+      const transaction = db.transaction((rows) => {
+        rows.forEach((item) => {
+          insert.run(
+            String(item.id ?? ""),
+            item.nome ?? null,
+            String(item.inicio ?? ""),
+            item.fim ?? null,
+            String(item.status ?? "")
+          );
+        });
+      });
+      transaction(periods);
+    }
+  }
+
+  const readsCount = db.prepare("SELECT COUNT(*) as total FROM produto_inventario").get().total;
+  if (readsCount === 0) {
+    const reads = readJsonFile(productInventoryFile, []);
+    if (Array.isArray(reads) && reads.length > 0) {
+      const insert = db.prepare(
+        "INSERT INTO produto_inventario (id, id_produto, id_inventario, quantidade, created_at, last_read, qtd_sistema, preco_unitario) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+      );
+      const transaction = db.transaction((rows) => {
+        rows.forEach((item) => {
+          insert.run(
+            String(item.id ?? randomUUID()),
+            String(item.id_produto ?? ""),
+            String(item.id_inventario ?? ""),
+            Number(item.quantidade ?? 1),
+            item.created_at ?? null,
+            item.last_read ?? null,
+            Number(item.qtd_sistema ?? 0),
+            Number(item.preco_unitario ?? 0)
+          );
+        });
+      });
+      transaction(reads);
+    }
+  }
+
+  const configRow = db.prepare("SELECT value FROM config WHERE key = 'fator_conversao'").get();
+  if (!configRow) {
+    const configData = readJsonFile(configFile, {});
+    const value = Number(configData?.fator_conversao ?? 100);
+    db.prepare("INSERT INTO config (key, value) VALUES ('fator_conversao', ?)").run(
+      String(Number.isFinite(value) && value > 0 ? value : 100)
     );
-  }
-  if (!fs.existsSync(productInventoryFile)) {
-    fs.writeFileSync(productInventoryFile, "[]", "utf8");
   }
 }
 
 function readProducts() {
-  ensureDataFile();
-  const raw = fs.readFileSync(dataFile, "utf8");
-  try {
-    const data = JSON.parse(raw);
-    return Array.isArray(data) ? data : [];
-  } catch {
-    return [];
-  }
+  initStorage();
+  return db.prepare("SELECT * FROM products").all();
 }
 
 function writeProducts(products) {
-  fs.writeFileSync(dataFile, JSON.stringify(products, null, 2), "utf8");
+  initStorage();
+  const clear = db.prepare("DELETE FROM products");
+  const insert = db.prepare(
+    "INSERT INTO products (codigo, codigo_barras, nome, quantidade, preco_unitario) VALUES (?, ?, ?, ?, ?)"
+  );
+  const transaction = db.transaction((rows) => {
+    clear.run();
+    rows.forEach((item) => {
+      insert.run(
+        String(item.codigo ?? ""),
+        String(item.codigo_barras ?? ""),
+        String(item.nome ?? ""),
+        Number(item.quantidade ?? 0),
+        Number(item.preco_unitario ?? 0)
+      );
+    });
+  });
+  transaction(products || []);
 }
 
 function readInventoryPeriods() {
-  ensureDataFile();
-  if (!fs.existsSync(inventoryPeriodsFile)) {
-    fs.writeFileSync(inventoryPeriodsFile, "[]", "utf8");
-  }
-  const raw = fs.readFileSync(inventoryPeriodsFile, "utf8");
-  try {
-    const data = JSON.parse(raw);
-    return Array.isArray(data) ? data : [];
-  } catch {
-    return [];
-  }
+  initStorage();
+  return db.prepare("SELECT * FROM inventarios").all();
 }
 
 function writeInventoryPeriods(periods) {
-  fs.writeFileSync(
-    inventoryPeriodsFile,
-    JSON.stringify(periods, null, 2),
-    "utf8"
+  initStorage();
+  const clear = db.prepare("DELETE FROM inventarios");
+  const insert = db.prepare(
+    "INSERT INTO inventarios (id, nome, inicio, fim, status) VALUES (?, ?, ?, ?, ?)"
   );
+  const transaction = db.transaction((rows) => {
+    clear.run();
+    rows.forEach((item) => {
+      insert.run(
+        String(item.id ?? ""),
+        item.nome ?? null,
+        String(item.inicio ?? ""),
+        item.fim ?? null,
+        String(item.status ?? "")
+      );
+    });
+  });
+  transaction(periods || []);
 }
 
 function readProductInventory() {
-  ensureDataFile();
-  const raw = fs.readFileSync(productInventoryFile, "utf8");
-  try {
-    const data = JSON.parse(raw);
-    return Array.isArray(data) ? data : [];
-  } catch {
-    return [];
-  }
+  initStorage();
+  return db.prepare("SELECT * FROM produto_inventario").all();
 }
 
 function writeProductInventory(items) {
-  fs.writeFileSync(productInventoryFile, JSON.stringify(items, null, 2), "utf8");
+  initStorage();
+  const clear = db.prepare("DELETE FROM produto_inventario");
+  const insert = db.prepare(
+    "INSERT INTO produto_inventario (id, id_produto, id_inventario, quantidade, created_at, last_read, qtd_sistema, preco_unitario) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+  );
+  const transaction = db.transaction((rows) => {
+    clear.run();
+    rows.forEach((item) => {
+      insert.run(
+        String(item.id ?? randomUUID()),
+        String(item.id_produto ?? ""),
+        String(item.id_inventario ?? ""),
+        Number(item.quantidade ?? 1),
+        item.created_at ?? null,
+        item.last_read ?? null,
+        Number(item.qtd_sistema ?? 0),
+        Number(item.preco_unitario ?? 0)
+      );
+    });
+  });
+  transaction(items || []);
 }
 
 function readConfig() {
-  ensureDataFile();
-  const raw = fs.readFileSync(configFile, "utf8");
-  try {
-    const data = JSON.parse(raw);
-    if (
-      data &&
-      Number.isFinite(Number(data.fator_conversao)) &&
-      Number(data.fator_conversao) > 0
-    ) {
-      return { fator_conversao: Number(data.fator_conversao) };
-    }
-  } catch {
-    // fallback abaixo
+  initStorage();
+  const row = db.prepare("SELECT value FROM config WHERE key = 'fator_conversao'").get();
+  const value = Number(row?.value ?? 100);
+  if (!Number.isFinite(value) || value <= 0) {
+    return { fator_conversao: 100 };
   }
-  return { fator_conversao: 100 };
+  return { fator_conversao: value };
 }
 
 function writeConfig(config) {
-  fs.writeFileSync(configFile, JSON.stringify(config, null, 2), "utf8");
+  initStorage();
+  const value = Number(config?.fator_conversao ?? 100);
+  const normalized = Number.isFinite(value) && value > 0 ? value : 100;
+  db.prepare(
+    "INSERT INTO config (key, value) VALUES ('fator_conversao', ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value"
+  ).run(String(normalized));
 }
 
 module.exports = {
-  ensureDataFile,
+  initStorage,
   readProducts,
   writeProducts,
   readInventoryPeriods,

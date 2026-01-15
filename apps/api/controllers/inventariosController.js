@@ -10,6 +10,7 @@ const { parseInventoryPeriodInput, buildNextInventoryId } = require("../utils/in
 const { buildListResponse } = require("../utils/pagination");
 const ExcelJS = require("exceljs");
 const { aggregateInventoryItems, buildReadEvent } = require("../utils/inventoryAggregation");
+const { logEvent } = require("../utils/events");
 const MAX_INVENTORY_NAME = 100;
 
 function normalizeHeader(value) {
@@ -153,6 +154,7 @@ function createInventario(req, res) {
   const newPeriod = { id: nextId, ...period };
   periods.push(newPeriod);
   writeInventoryPeriods(periods);
+  logEvent("inventario_created", { inventario: newPeriod });
   res.status(201).json(newPeriod);
 }
 
@@ -174,6 +176,7 @@ function updateInventario(req, res) {
   const updated = { id: periods[index].id, ...period };
   periods[index] = updated;
   writeInventoryPeriods(periods);
+  logEvent("inventario_updated", { inventario: updated });
   res.json(updated);
 }
 
@@ -205,6 +208,7 @@ function updateInventarioNome(req, res) {
   };
   periods[index] = updated;
   writeInventoryPeriods(periods);
+  logEvent("inventario_nome_updated", { inventario: updated });
   res.json(updated);
 }
 
@@ -317,6 +321,7 @@ async function importInventarioXlsx(req, res) {
     };
     periods.push(inventory);
     writeInventoryPeriods(periods);
+    logEvent("inventario_created", { inventario: inventory, origem: "import" });
   }
 
   const products = readProducts();
@@ -368,6 +373,11 @@ async function importInventarioXlsx(req, res) {
   }
 
   writeProductInventory([...existingReads, ...readsToInsert]);
+  logEvent("inventario_imported", {
+    inventario_id: inventory.id,
+    total_produtos: totalProdutos,
+    total_leituras: totalLeituras,
+  });
 
   res.json({
     inventario: inventory,
@@ -386,6 +396,7 @@ function deleteInventario(req, res) {
 
   const removed = periods.splice(index, 1)[0];
   writeInventoryPeriods(periods);
+  logEvent("inventario_deleted", { inventario: removed });
   res.json(removed);
 }
 
@@ -403,6 +414,7 @@ function closeOpenInventario(req, res) {
   };
   periods[index] = updated;
   writeInventoryPeriods(periods);
+  logEvent("inventario_closed", { inventario: updated });
   res.json(updated);
 }
 
@@ -429,6 +441,7 @@ function closeInventario(req, res) {
   };
   periods[index] = updated;
   writeInventoryPeriods(periods);
+  logEvent("inventario_closed", { inventario: updated });
   res.json(updated);
 }
 
@@ -464,6 +477,7 @@ function mergeInventarios(req, res) {
   });
 
   writeProductInventory(updatedItems);
+  logEvent("inventario_merged", { from: fromId, to: toId, moved });
 
   res.json({
     from: fromInventory,

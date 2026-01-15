@@ -10,6 +10,7 @@ const {
   aggregateInventoryItems,
   buildRecentReads,
 } = require("../utils/inventoryAggregation");
+const { logEvent } = require("../utils/events");
 
 function getInventoryById(periods, inventoryId) {
   return periods.find((item) => item.id === inventoryId) || null;
@@ -112,6 +113,12 @@ function deleteLeitura(req, res) {
     config,
     inventoryId,
     limit: 5,
+  });
+  logEvent("leitura_removed", {
+    inventario_id: inventoryId,
+    leitura_id: itemIndex >= 0 ? leituraId : null,
+    produto_id: itemIndex >= 0 ? null : leituraId,
+    quantidade: removedCount,
   });
 
   res.json({

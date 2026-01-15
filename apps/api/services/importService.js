@@ -8,6 +8,7 @@ const {
   getCodigoFromNome,
 } = require("../utils/products");
 const { readConfig, readProducts, writeProducts } = require("../utils/storage");
+const { logEvent } = require("../utils/events");
 
 function normalizeName(nome) {
   return String(nome ?? "")
@@ -112,6 +113,7 @@ async function importProductsFromPdfBuffer(pdfBuffer) {
   }
 
   writeProducts(products);
+  logEvent("produtos_importados_pdf", { created, updated, skipped });
   return { created, updated, skipped };
 }
 
@@ -217,6 +219,7 @@ function importInventarioFromCsvContent(content) {
   }
 
   writeProducts(products);
+  logEvent("produtos_importados_csv", { created, updated, skipped });
   return { created, updated, skipped };
 }
 

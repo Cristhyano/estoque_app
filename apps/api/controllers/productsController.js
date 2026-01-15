@@ -10,6 +10,7 @@ const {
   parseProductInput,
 } = require("../utils/products");
 const { buildListResponse } = require("../utils/pagination");
+const { logEvent } = require("../utils/events");
 
 function listProducts(req, res) {
   const products = readProducts();
@@ -84,6 +85,7 @@ function createProduct(req, res) {
 
   products.push(product);
   writeProducts(products);
+  logEvent("produto_created", { produto: product });
   const config = readConfig();
   res.status(201).json(withDecimalValue(product, config));
 }
@@ -112,6 +114,7 @@ function updateProduct(req, res) {
 
   products[index] = product;
   writeProducts(products);
+  logEvent("produto_updated", { produto: product });
   const config = readConfig();
   res.json(withDecimalValue(product, config));
 }
@@ -125,6 +128,7 @@ function deleteProduct(req, res) {
 
   const removed = products.splice(index, 1)[0];
   writeProducts(products);
+  logEvent("produto_deleted", { produto: removed });
   const config = readConfig();
   res.json(withDecimalValue(removed, config));
 }

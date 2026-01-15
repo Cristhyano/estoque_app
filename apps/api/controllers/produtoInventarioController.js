@@ -16,6 +16,7 @@ const {
   buildRecentReads,
   buildReadEvent,
 } = require("../utils/inventoryAggregation");
+const { logEvent } = require("../utils/events");
 
 function parseCodeInput(body) {
   const codigo = String(body.codigo ?? body.code ?? "").trim();
@@ -163,6 +164,11 @@ function createProdutoInventario(req, res) {
     config,
     inventoryId: inventory.id,
     limit: 5,
+  });
+  logEvent("leitura_created", {
+    inventario_id: inventory.id,
+    leitura_id: readEvent.id,
+    produto_id: readEvent.id_produto,
   });
   res.json({
     produto: product,
