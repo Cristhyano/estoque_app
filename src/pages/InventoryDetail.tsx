@@ -348,14 +348,6 @@ const InventoryDetail = () => {
                         {inventory?.nome ?? "Inventario"} - {formatDateTime(inventory?.inicio)} - {formatDateTime(inventory?.fim)}
                     </div>
                 </div>
-                <div className="flex flex-row gap-4">
-                    <Link
-                        to="/inventarios"
-                        className="bg-neutral-800 px-2 rounded text-white flex flex-row items-center gap-2 cursor-pointer"
-                    >
-                        Voltar
-                    </Link>
-                </div>
             </header>
 
             <Divider />

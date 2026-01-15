@@ -420,19 +420,25 @@ const InventoryScan = () => {
             <div className="flex flex-col gap-4 h-full overflow-hidden rounded">
                 <div className="flex flex-col overflow-hidden rounded">
                     <div className="flex-1 overflow-y-auto">
-                        <Table className="uppercase overflow-visible rounded">
+                        <Table className="uppercase overflow-visible rounded table-fixed">
                             <TableHeader>
                                 <TableRow className="sticky top-0 bg-neutral-200">
-                                    <TableHead className="text-left">cod.</TableHead>
-                                    <TableHead className="text-left">nome</TableHead>
-                                    <TableHead className="text-right">preco</TableHead>
-                                    <TableHead className="text-left">horario</TableHead>
-                                    <TableHead className="text-right">acao</TableHead>
+                                    <TableHead className="text-left w-32">cod.</TableHead>
+                                    <TableHead className="text-left w-[28rem]">nome</TableHead>
+                                    <TableHead className="text-center w-20">qtd.</TableHead>
+                                    <TableHead className="text-left w-40">ultima leitura</TableHead>
+                                    <TableHead className="text-right w-28">acao</TableHead>
                                 </TableRow>
                             </TableHeader>
 
                             <TableBody>
-                                {recentReads.length === 0 ? (
+                                {isPending ? (
+                                    <TableRow>
+                                        <TableCell colSpan={5} className="text-center">
+                                            Carregando
+                                        </TableCell>
+                                    </TableRow>
+                                ) : recentReads.length === 0 ? (
                                     <TableRow>
                                         <TableCell colSpan={5} className="text-center">
                                             Nenhuma leitura recente
@@ -447,11 +453,8 @@ const InventoryScan = () => {
                                             <TableRow key={rowKey} className="hover:bg-neutral-400/20 duration-200">
                                                 <TableCell className="text-left">{codigoProduto}</TableCell>
                                                 <TableCell className="text-left">{produto?.nome ?? "-"}</TableCell>
-                                                <TableCell className="text-right">
-                                                    {new Intl.NumberFormat("pt-BR", {
-                                                        style: "currency",
-                                                        currency: "BRL",
-                                                    }).format(Number(read.preco_unitario ?? 0))}
+                                                <TableCell className="text-center">
+                                                    1
                                                 </TableCell>
                                                 <TableCell className="text-left">
                                                     {formatDateTime(read.created_at)}
@@ -481,28 +484,27 @@ const InventoryScan = () => {
 
                 <div className="flex flex-col overflow-hidden rounded">
                     <div className="flex-1 overflow-y-auto">
-                        <Table className="uppercase overflow-visible rounded">
+                        <Table className="uppercase overflow-visible rounded table-fixed">
                             <TableHeader>
                                 <TableRow className="sticky top-0 bg-neutral-200">
-                                    <TableHead className="text-left">cod.</TableHead>
-                                    {/* <TableHead className="text-left">cod. barras</TableHead> */}
-                                    <TableHead className="text-left">nome</TableHead>
-                                    <TableHead className="text-center">qtd.</TableHead>
-                                    <TableHead className="text-right">ultima leitura</TableHead>
-                                    <TableHead className="text-right">remover</TableHead>
+                                    <TableHead className="text-left w-32">cod.</TableHead>
+                                    <TableHead className="text-left w-[28rem]">nome</TableHead>
+                                    <TableHead className="text-center w-20">qtd.</TableHead>
+                                    <TableHead className="text-left w-40">ultima leitura</TableHead>
+                                    <TableHead className="text-right w-28">acao</TableHead>
                                 </TableRow>
                             </TableHeader>
 
                             <TableBody>
                                 {isPending ? (
                                     <TableRow>
-                                        <TableCell colSpan={6} className="text-center">
+                                        <TableCell colSpan={5} className="text-center">
                                             Carregando
                                         </TableCell>
                                     </TableRow>
                                 ) : items.length === 0 ? (
                                     <TableRow>
-                                        <TableCell colSpan={6} className="text-center">
+                                        <TableCell colSpan={5} className="text-center">
                                             Nenhuma leitura ainda
                                         </TableCell>
                                     </TableRow>
@@ -510,7 +512,6 @@ const InventoryScan = () => {
                                     items.map((item) => {
                                         const produto = item.produto
                                         const codigoProduto = String(produto?.codigo ?? "")
-                                        const codigoBarras = String(produto?.codigo_barras ?? "")
                                         const rowKey = `${item.id_inventario}-${item.id_produto}`
                                         const highlight =
                                             highlightId && highlightId === item.id_produto
@@ -526,14 +527,11 @@ const InventoryScan = () => {
                                                     }`}
                                             >
                                                 <TableCell className="text-left">{codigoProduto}</TableCell>
-                                                {/* <TableCell className="text-left">{codigoBarras}</TableCell> */}
-                                                <TableCell className="text-left">
-                                                    {produto?.nome ?? "-"}
-                                                </TableCell>
+                                                <TableCell className="text-left">{produto?.nome ?? "-"}</TableCell>
                                                 <TableCell className="text-center">
                                                     {qtdConferida}
                                                 </TableCell>
-                                                <TableCell className="text-right">
+                                                <TableCell className="text-left">
                                                     {formatDateTime(item.last_read)}
                                                 </TableCell>
                                                 <TableCell className="text-right">
@@ -589,18 +587,6 @@ const InventoryScan = () => {
                                     })
                                 )}
                             </TableBody>
-
-                            <TableFooter>
-                                <TableRow className="sticky bottom-0 bg-neutral-200">
-                                    <TableCell className="text-left">
-                                        {data?.inventario?.nome ?? "Inventario aberto"}
-                                    </TableCell>
-                                    <TableCell></TableCell>
-                                    <TableCell></TableCell>
-                                    <TableCell className="text-center">{totalQuantidade}</TableCell>
-                                    <TableCell className="text-right"></TableCell>
-                                </TableRow>
-                            </TableFooter>
                         </Table>
                     </div>
                 </div>
