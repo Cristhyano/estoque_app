@@ -27,6 +27,14 @@
       {
         "from": "../web/dist",
         "to": "dist"
+      },
+      {
+        "from": "../api",
+        "to": "api"
+      },
+      {
+        "from": "../node_modules",
+        "to": "node_modules"
       }
     ],
     "win": {

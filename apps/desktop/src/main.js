@@ -1,9 +1,49 @@
 ﻿const path = require("path");
 const { app, BrowserWindow, shell } = require("electron");
+const { spawn } = require("child_process");
 
 let mainWindow;
+let apiProcess;
 
 const isDev = !app.isPackaged || process.argv.includes("--dev");
+
+function getApiEntryPath() {
+  if (app.isPackaged) {
+    return path.join(process.resourcesPath, "api", "server.js");
+  }
+  return path.join(__dirname, "..", "..", "api", "server.js");
+}
+
+function startApi() {
+  if (process.env.START_LOCAL_API === "0") {
+    return;
+  }
+  if (apiProcess) return;
+  const apiEntry = getApiEntryPath();
+  const nodePath = app.isPackaged
+    ? path.join(process.resourcesPath, "node_modules")
+    : path.join(__dirname, "..", "..", "..", "node_modules");
+
+  apiProcess = spawn(process.execPath, [apiEntry], {
+    env: {
+      ...process.env,
+      PORT: process.env.API_PORT || "3001",
+      NODE_PATH: nodePath,
+    },
+    stdio: "ignore",
+    windowsHide: true,
+  });
+
+  apiProcess.on("exit", () => {
+    apiProcess = null;
+  });
+}
+
+function stopApi() {
+  if (!apiProcess) return;
+  apiProcess.kill();
+  apiProcess = null;
+}
 
 function getProdIndexPath() {
   if (app.isPackaged) {
@@ -43,9 +83,13 @@ function createWindow() {
   });
 }
 
-app.whenReady().then(createWindow);
+app.whenReady().then(() => {
+  startApi();
+  createWindow();
+});
 
 app.on("window-all-closed", () => {
+  stopApi();
   if (process.platform !== "darwin") {
     app.quit();
   }
@@ -56,4 +100,3 @@ app.on("activate", () => {
     createWindow();
   }
 });
-

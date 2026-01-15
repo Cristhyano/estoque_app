@@ -1,6 +1,6 @@
 ﻿# Estoque Desktop
 
-Wrapper desktop do front-end usando Electron. O backend continua rodando na API existente.
+Wrapper desktop do front-end usando Electron. O backend roda localmente ao abrir o app.
 
 ## Desenvolvimento
 
@@ -15,6 +15,13 @@ npm --prefix ../web run dev
 
 ```bash
 npm install
+npm run dev
+```
+
+Se quiser impedir o Electron de iniciar a API automaticamente:
+
+```bash
+set START_LOCAL_API=0
 npm run dev
 ```
 
