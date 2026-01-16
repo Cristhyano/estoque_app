@@ -78,11 +78,26 @@ function parsePtBrDecimalToInteger(value, fator) {
   return Math.round(numberValue * fator);
 }
 
+function generateInternalCode(codigo_barras) {
+  const raw = String(codigo_barras ?? "").trim();
+  if (!raw) return "";
+  return `INT-${raw}`;
+}
+
 function normalizeCodigoFields(codigoRaw, codigoBarrasRaw) {
   const codigo = String(codigoRaw ?? "").trim();
   const codigo_barras = String(codigoBarrasRaw ?? "").trim();
-  if (codigo && codigo.length > 6 && !codigo_barras) {
-    return { codigo: "", codigo_barras: codigo };
+  if (codigo && codigo.length > 6 && !codigo_barras && /^\d+$/.test(codigo)) {
+    return {
+      codigo: generateInternalCode(codigo),
+      codigo_barras: codigo,
+    };
+  }
+  if (!codigo && codigo_barras) {
+    return {
+      codigo: generateInternalCode(codigo_barras),
+      codigo_barras,
+    };
   }
   return { codigo, codigo_barras };
 }
@@ -128,7 +143,7 @@ function parseProductInput(body) {
   const preco_unitario = Number(priceRaw);
 
   const errors = [];
-  if (!codigo && !codigo_barras) errors.push("codigo");
+  if (!codigo) errors.push("codigo");
   if (!nome) errors.push("nome");
   if (!Number.isFinite(quantidade) || quantidade < 0) errors.push("quantidade");
   if (!Number.isFinite(preco_unitario) || preco_unitario < 0)

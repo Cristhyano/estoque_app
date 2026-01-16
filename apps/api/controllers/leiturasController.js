@@ -61,7 +61,7 @@ function applyLeituraRemove(payload) {
 
   if (itemIndex >= 0) {
     if (quantidade !== 1) {
-      return res.status(400).json({ error: "Quantidade invalida" });
+      throw makeError(400, "Quantidade invalida");
     }
     const removed = items[itemIndex];
     inventoryId = String(removed.id_inventario ?? "");

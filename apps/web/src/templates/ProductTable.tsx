@@ -48,6 +48,9 @@ const ProductTable = ({ filters, onMetaChange }: ProductTableProps) => {
                 ? `${apiBaseUrl}/products?${queryString}`
                 : `${apiBaseUrl}/products`
             const response = await fetch(url)
+            if (!response.ok) {
+                throw new Error("Falha ao carregar produtos")
+            }
             return await response.json()
         },
     })
