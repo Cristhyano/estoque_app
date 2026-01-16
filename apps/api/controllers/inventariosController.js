@@ -67,7 +67,9 @@ function listInventarios(req, res) {
   const productInventory = readProductInventory();
   const totalsByInventory = productInventory.reduce((acc, item) => {
     const current = acc.get(item.id_inventario) ?? 0;
-    const increment = Number(item.quantidade ?? 1) || 1;
+    const incrementRaw = Number(item.quantidade);
+    const increment =
+      Number.isFinite(incrementRaw) && incrementRaw > 0 ? incrementRaw : 0;
     acc.set(item.id_inventario, current + increment);
     return acc;
   }, new Map());
@@ -216,6 +218,84 @@ function updateInventarioNome(req, res) {
   writeInventoryPeriods(periods);
   logEvent("inventario_nome_updated", { inventario: updated });
   res.json(updated);
+}
+
+function listInventarioItems(req, res) {
+  const inventoryId = String(req.params.id ?? "").trim();
+  if (!inventoryId) {
+    return res.status(400).json({ error: "Inventario invalido" });
+  }
+
+  const periods = readInventoryPeriods();
+  const inventory = periods.find((item) => item.id === inventoryId);
+  if (!inventory) {
+    return res.status(404).json({ error: "Inventario nao encontrado" });
+  }
+
+  const products = readProducts();
+  const config = readConfig();
+  const items = readProductInventory();
+  const aggregated = aggregateInventoryItems({
+    items,
+    products,
+    config,
+    inventoryId,
+    includeProduct: true,
+  });
+
+  const totals = aggregated.reduce(
+    (acc, item) => {
+      const qtdSistema = Number(item.qtd_sistema ?? 0);
+      const qtdConferida = Number(item.qtd_conferida ?? item.quantidade ?? 0);
+      const ajuste = Number(item.ajuste ?? 0);
+      const valorSistema = Number(item.valor_sistema ?? 0);
+      const valorConferido = Number(item.valor_conferido ?? 0);
+      const diferencaValor = Number(item.diferenca_valor ?? 0);
+      return {
+        qtdSistema: acc.qtdSistema + qtdSistema,
+        qtdConferida: acc.qtdConferida + qtdConferida,
+        ajuste: acc.ajuste + ajuste,
+        valorSistema: acc.valorSistema + valorSistema,
+        valorConferido: acc.valorConferido + valorConferido,
+        diferencaValor: acc.diferencaValor + diferencaValor,
+      };
+    },
+    {
+      qtdSistema: 0,
+      qtdConferida: 0,
+      ajuste: 0,
+      valorSistema: 0,
+      valorConferido: 0,
+      diferencaValor: 0,
+    }
+  );
+
+  const codigoFilter = String(req.query.codigo ?? "").trim().toLowerCase();
+  const codigoBarrasFilter = String(req.query.codigo_barras ?? "").trim().toLowerCase();
+  const nomeFilter = String(req.query.nome ?? "").trim().toLowerCase();
+
+  let filtered = aggregated;
+  if (codigoFilter) {
+    filtered = filtered.filter((item) =>
+      String(item.produto?.codigo ?? "").toLowerCase().includes(codigoFilter)
+    );
+  }
+  if (codigoBarrasFilter) {
+    filtered = filtered.filter((item) =>
+      String(item.produto?.codigo_barras ?? "").toLowerCase().includes(codigoBarrasFilter)
+    );
+  }
+  if (nomeFilter) {
+    filtered = filtered.filter((item) =>
+      String(item.produto?.nome ?? "").toLowerCase().includes(nomeFilter)
+    );
+  }
+
+  const listResponse = buildListResponse(filtered, req.query, totals);
+  if (listResponse.response) {
+    return res.json(listResponse.response);
+  }
+  res.json(listResponse.pagedItems);
 }
 
 async function importInventarioFromBuffer({ buffer, inventarioId }) {
@@ -606,6 +686,7 @@ async function exportInventario(req, res) {
 
 module.exports = {
   listInventarios,
+  listInventarioItems,
   getInventario,
   createInventario,
   updateInventario,

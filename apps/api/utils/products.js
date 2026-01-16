@@ -146,6 +146,7 @@ function parseProductInput(body) {
   if (!codigo) errors.push("codigo");
   if (!nome) errors.push("nome");
   if (!Number.isFinite(quantidade) || quantidade < 0) errors.push("quantidade");
+  if (!Number.isInteger(quantidade)) errors.push("quantidade");
   if (!Number.isFinite(preco_unitario) || preco_unitario < 0)
     errors.push("preco_unitario");
   if (!Number.isInteger(preco_unitario)) errors.push("preco_unitario");

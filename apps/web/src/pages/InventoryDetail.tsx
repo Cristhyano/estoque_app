@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+﻿import { useEffect, useState } from "react"
 import type { ChangeEvent } from "react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useParams } from "@tanstack/react-router"
@@ -37,13 +37,27 @@ type ProductInventoryItem = {
     valor_conferido?: number
     diferenca_valor?: number
     last_read?: string | null
+    produto?: {
+        codigo?: string
+        codigo_barras?: string
+        nome?: string
+    } | null
 }
 
-type Product = {
-    codigo?: string
-    codigo_barras?: string
-    nome?: string
-    quantidade?: number
+type InventoryItemsResponse = {
+    items: ProductInventoryItem[]
+    total_items: number
+    total_pages: number
+    page: number
+    limit: number
+    totals?: {
+        qtdSistema?: number
+        qtdConferida?: number
+        ajuste?: number
+        valorSistema?: number
+        valorConferido?: number
+        diferencaValor?: number
+    }
 }
 
 type DetailFilters = {
@@ -71,8 +85,6 @@ const formatCurrency = (value?: number | null) => {
         currency: "BRL",
     }).format(Number.isFinite(safeValue) ? safeValue : 0)
 }
-
-const normalize = (value: string) => value.trim().toLowerCase()
 
 const InventoryDetail = () => {
     const { id } = useParams({ from: "/inventarios/$id" })
@@ -147,25 +159,22 @@ const InventoryDetail = () => {
         },
     })
 
-    const productInventoryQuery = useQuery({
-        queryKey: ["produto-inventario", id],
+    const itemsQuery = useQuery({
+        queryKey: ["inventario-items", id, filters],
         queryFn: async () => {
-            const response = await fetch(`${apiBaseUrl}/produto-inventario`)
+            const searchParams = new URLSearchParams()
+            Object.entries(filters).forEach(([key, value]) => {
+                if (value.trim() !== "") {
+                    searchParams.set(key, value)
+                }
+            })
+            searchParams.set("include_totals", "1")
+            const queryString = searchParams.toString()
+            const response = await fetch(`${apiBaseUrl}/inventarios/${id}/items?${queryString}`)
             if (!response.ok) {
                 throw new Error("Falha ao carregar itens do inventario")
             }
-            return (await response.json()) as ProductInventoryItem[]
-        },
-    })
-
-    const productsQuery = useQuery({
-        queryKey: ["products", "all"],
-        queryFn: async () => {
-            const response = await fetch(`${apiBaseUrl}/products`)
-            if (!response.ok) {
-                throw new Error("Falha ao carregar produtos")
-            }
-            return (await response.json()) as Product[]
+            return (await response.json()) as InventoryItemsResponse
         },
     })
 
@@ -230,75 +239,15 @@ const InventoryDetail = () => {
         setNameError(null)
         updateNameMutation.mutate(trimmed ? trimmed : null)
     }
-    const productInventory = Array.isArray(productInventoryQuery.data) ? productInventoryQuery.data : []
-    const products = Array.isArray(productsQuery.data) ? productsQuery.data : []
 
-    const productsById = new Map(
-        products.map((item) => [
-            item.codigo || item.codigo_barras || "",
-            item,
-        ])
-    )
+    const itemsPayload = itemsQuery.data
+    const rows = Array.isArray(itemsPayload?.items) ? itemsPayload.items : []
+    const totalItems = Number(itemsPayload?.total_items ?? rows.length)
+    const totalPages = Number(itemsPayload?.total_pages ?? 0)
+    const totals = itemsPayload?.totals ?? {}
 
-    const rawItems = productInventory.filter((item) => item.id_inventario === id)
-    const normalizedCodigo = normalize(filters.codigo)
-    const normalizedCodigoBarras = normalize(filters.codigo_barras)
-    const normalizedNome = normalize(filters.nome)
-
-    let filteredItems = rawItems.filter((item) => {
-        const product = productsById.get(item.id_produto)
-        const codigo = normalize(product?.codigo ?? "")
-        const codigoBarras = normalize(product?.codigo_barras ?? "")
-        const nome = normalize(product?.nome ?? "")
-
-        if (normalizedCodigo && !codigo.includes(normalizedCodigo)) {
-            return false
-        }
-        if (normalizedCodigoBarras && !codigoBarras.includes(normalizedCodigoBarras)) {
-            return false
-        }
-        if (normalizedNome && !nome.includes(normalizedNome)) {
-            return false
-        }
-
-        return true
-    })
-
-    const limit = Math.max(1, Number(filters.limit) || 20)
-    const page = Math.max(1, Number(filters.page) || 1)
-    const totalItems = filteredItems.length
-    const totalPages = totalItems === 0 ? 0 : Math.ceil(totalItems / limit)
-    const start = (page - 1) * limit
-    const rows = filteredItems.slice(start, start + limit)
-    const totals = rawItems.reduce(
-        (acc, item) => {
-            const qtdSistema = Number(item.qtd_sistema ?? 0)
-            const qtdConferida = Number(item.qtd_conferida ?? item.quantidade ?? 0)
-            const ajuste = Number(item.ajuste ?? 0)
-            const valorSistema = Number(item.valor_sistema ?? 0)
-            const valorConferido = Number(item.valor_conferido ?? 0)
-            const diferencaValor = Number(item.diferenca_valor ?? 0)
-            return {
-                qtdSistema: acc.qtdSistema + qtdSistema,
-                qtdConferida: acc.qtdConferida + qtdConferida,
-                ajuste: acc.ajuste + ajuste,
-                valorSistema: acc.valorSistema + valorSistema,
-                valorConferido: acc.valorConferido + valorConferido,
-                diferencaValor: acc.diferencaValor + diferencaValor,
-            }
-        },
-        {
-            qtdSistema: 0,
-            qtdConferida: 0,
-            ajuste: 0,
-            valorSistema: 0,
-            valorConferido: 0,
-            diferencaValor: 0,
-        }
-    )
-
-    const isLoading = inventoryQuery.isPending || productInventoryQuery.isPending || productsQuery.isPending
-    const isFetching = inventoryQuery.isFetching || productInventoryQuery.isFetching || productsQuery.isFetching
+    const isLoading = inventoryQuery.isPending || itemsQuery.isPending
+    const isFetching = inventoryQuery.isFetching || itemsQuery.isFetching
 
     return (
         <>
@@ -416,9 +365,9 @@ const InventoryDetail = () => {
                                 </TableRow>
                             ) : (
                                 rows.map((item) => {
-                                    const product = productsById.get(item.id_produto)
-                                    const codigoProduto = String(product?.codigo ?? item.id_produto ?? "")
-                                    const qtdSistema = Number(item.qtd_sistema ?? product?.quantidade ?? 0)
+                                    const produto = item.produto
+                                    const codigoProduto = String(produto?.codigo ?? item.id_produto ?? "")
+                                    const qtdSistema = Number(item.qtd_sistema ?? 0)
                                     const qtdConferida = Number(item.qtd_conferida ?? item.quantidade ?? 0)
                                     const ajuste = Number(item.ajuste ?? qtdConferida - qtdSistema)
                                     const precoUnitario = Number(item.preco_unitario ?? 0)
@@ -428,7 +377,7 @@ const InventoryDetail = () => {
                                     return (
                                         <TableRow key={`${item.id_inventario}-${item.id_produto}`} className="hover:bg-neutral-400/20 duration-200">
                                             <TableCell className="text-left">{codigoProduto}</TableCell>
-                                            <TableCell className="text-left">{product?.nome ?? "-"}</TableCell>
+                                            <TableCell className="text-left">{produto?.nome ?? "-"}</TableCell>
                                             <TableCell className="text-right">{formatCurrency(precoUnitario)}</TableCell>
                                             <TableCell className="text-center">{qtdSistema}</TableCell>
                                             <TableCell className="text-center">{qtdConferida}</TableCell>
@@ -447,12 +396,12 @@ const InventoryDetail = () => {
                                 <TableCell></TableCell>
                                 <TableCell></TableCell>
                                 <TableCell></TableCell>
-                                <TableCell className="text-center">{totals.qtdSistema}</TableCell>
-                                <TableCell className="text-center">{totals.qtdConferida}</TableCell>
-                                <TableCell className="text-center">{totals.ajuste}</TableCell>
-                                <TableCell className="text-right">{formatCurrency(totals.valorSistema)}</TableCell>
-                                <TableCell className="text-right">{formatCurrency(totals.valorConferido)}</TableCell>
-                                <TableCell className="text-right">{formatCurrency(totals.diferencaValor)}</TableCell>
+                                <TableCell className="text-center">{totals.qtdSistema ?? 0}</TableCell>
+                                <TableCell className="text-center">{totals.qtdConferida ?? 0}</TableCell>
+                                <TableCell className="text-center">{totals.ajuste ?? 0}</TableCell>
+                                <TableCell className="text-right">{formatCurrency(totals.valorSistema ?? 0)}</TableCell>
+                                <TableCell className="text-right">{formatCurrency(totals.valorConferido ?? 0)}</TableCell>
+                                <TableCell className="text-right">{formatCurrency(totals.diferencaValor ?? 0)}</TableCell>
                             </TableRow>
                         </TableFooter>
                     </Table>

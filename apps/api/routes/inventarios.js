@@ -6,6 +6,7 @@ const {
   updateInventario,
   updateInventarioNome,
   importInventarioXlsx,
+  listInventarioItems,
   mergeInventarios,
   deleteInventario,
   closeOpenInventario,
@@ -84,6 +85,49 @@ router.get("/", listInventarios);
  */
 router.get("/:id/export", exportInventario);
 router.patch("/:id/fechar", closeInventario);
+router.get("/:id/items", listInventarioItems);
+/**
+ * @swagger
+ * /inventarios/{id}/items:
+ *   get:
+ *     tags: [Inventarios]
+ *     summary: Lista itens agregados do inventario
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: codigo
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: codigo_barras
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: nome
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: include_totals
+ *         schema:
+ *           type: boolean
+ *     responses:
+ *       200:
+ *         description: Itens do inventario
+ *       404:
+ *         description: Inventario nao encontrado
+ */
 router.get("/:id", getInventario);
 router.post("/import", upload.single("file"), importInventarioXlsx);
 router.post("/merge", mergeInventarios);

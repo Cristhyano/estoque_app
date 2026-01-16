@@ -112,6 +112,17 @@ function updateProduct(req, res) {
     return res.status(404).json({ error: "Produto nao encontrado" });
   }
 
+  const conflict = products.some((item, idx) => {
+    if (idx === index) return false;
+    return (
+      (product.codigo && item.codigo === product.codigo) ||
+      (product.codigo_barras && item.codigo_barras === product.codigo_barras)
+    );
+  });
+  if (conflict) {
+    return res.status(409).json({ error: "Codigo ja cadastrado" });
+  }
+
   products[index] = product;
   writeProducts(products);
   logEvent("produto_updated", { produto: product });
