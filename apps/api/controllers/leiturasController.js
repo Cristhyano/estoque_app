@@ -12,6 +12,12 @@ const {
 } = require("../utils/inventoryAggregation");
 const { logEvent } = require("../utils/events");
 
+function makeError(status, message) {
+  const error = new Error(message);
+  error.status = status;
+  return error;
+}
+
 function getInventoryById(periods, inventoryId) {
   return periods.find((item) => item.id === inventoryId) || null;
 }
@@ -36,15 +42,15 @@ function sortByReadTimestampDesc(a, b) {
   return String(bTime).localeCompare(String(aTime));
 }
 
-function deleteLeitura(req, res) {
-  const leituraId = String(req.params.id ?? "").trim();
+function applyLeituraRemove(payload) {
+  const leituraId = String(payload.id ?? payload.leitura_id ?? "").trim();
   if (!leituraId) {
-    return res.status(400).json({ error: "Leitura invalida" });
+    throw makeError(400, "Leitura invalida");
   }
 
-  const quantidade = parseQuantidadeParam(req.query.quantidade ?? 1);
+  const quantidade = parseQuantidadeParam(payload.quantidade ?? 1);
   if (!quantidade) {
-    return res.status(400).json({ error: "Quantidade invalida" });
+    throw makeError(400, "Quantidade invalida");
   }
 
   const items = readProductInventory();
@@ -65,10 +71,10 @@ function deleteLeitura(req, res) {
     const periods = readInventoryPeriods();
     inventoryId = resolveInventoryId({
       periods,
-      providedId: String(req.query.inventario_id ?? req.query.inventarioId ?? "").trim(),
+      providedId: String(payload.inventario_id ?? payload.inventarioId ?? "").trim(),
     });
     if (!inventoryId) {
-      return res.status(404).json({ error: "Inventario nao encontrado" });
+      throw makeError(404, "Inventario nao encontrado");
     }
     const matching = items
       .map((item, index) => ({ item, index }))
@@ -79,10 +85,10 @@ function deleteLeitura(req, res) {
       )
       .sort((a, b) => sortByReadTimestampDesc(a.item, b.item));
     if (matching.length === 0) {
-      return res.status(404).json({ error: "Leitura nao encontrada" });
+      throw makeError(404, "Leitura nao encontrada");
     }
     if (quantidade > matching.length) {
-      return res.status(400).json({ error: "Quantidade invalida" });
+      throw makeError(400, "Quantidade invalida");
     }
     const toRemove = new Set(
       matching.slice(0, quantidade).map(({ index }) => index)
@@ -121,14 +127,29 @@ function deleteLeitura(req, res) {
     quantidade: removedCount,
   });
 
-  res.json({
+  return {
     removed: removedCount,
     inventario: inventory,
     items: aggregated,
     recent_reads,
-  });
+  };
+}
+
+function deleteLeitura(req, res) {
+  try {
+    const payload = applyLeituraRemove({
+      id: req.params.id,
+      quantidade: req.query.quantidade,
+      inventario_id: req.query.inventario_id ?? req.query.inventarioId,
+    });
+    res.json(payload);
+  } catch (error) {
+    const status = error.status || 400;
+    res.status(status).json({ error: error.message });
+  }
 }
 
 module.exports = {
   deleteLeitura,
+  applyLeituraRemove,
 };

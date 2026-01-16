@@ -1,5 +1,6 @@
 type RuntimeConfig = {
   apiBaseUrl?: string;
+  origin?: "web" | "desktop";
 };
 
 const runtimeConfig = (globalThis as { __APP_CONFIG__?: RuntimeConfig })
@@ -10,4 +11,6 @@ const apiBaseUrl =
   import.meta.env.VITE_API_BASE_URL ||
   "http://localhost:3001";
 
-export { apiBaseUrl };
+const appOrigin = runtimeConfig?.origin || "web";
+
+export { apiBaseUrl, appOrigin };

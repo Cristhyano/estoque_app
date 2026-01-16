@@ -13,6 +13,12 @@ const { aggregateInventoryItems, buildReadEvent } = require("../utils/inventoryA
 const { logEvent } = require("../utils/events");
 const MAX_INVENTORY_NAME = 100;
 
+function makeError(status, message) {
+  const error = new Error(message);
+  error.status = status;
+  return error;
+}
+
 function normalizeHeader(value) {
   return String(value ?? "")
     .trim()
@@ -212,21 +218,17 @@ function updateInventarioNome(req, res) {
   res.json(updated);
 }
 
-async function importInventarioXlsx(req, res) {
-  if (!req.file) {
-    return res.status(400).json({ error: "Arquivo nao informado" });
-  }
-
+async function importInventarioFromBuffer({ buffer, inventarioId }) {
   const workbook = new ExcelJS.Workbook();
   try {
-    await workbook.xlsx.load(req.file.buffer);
+    await workbook.xlsx.load(buffer);
   } catch (error) {
-    return res.status(400).json({ error: "Arquivo invalido" });
+    throw makeError(400, "Arquivo invalido");
   }
 
   const worksheet = workbook.worksheets[0];
   if (!worksheet) {
-    return res.status(400).json({ error: "Planilha nao encontrada" });
+    throw makeError(400, "Planilha nao encontrada");
   }
 
   let headerRowIndex = null;
@@ -257,7 +259,7 @@ async function importInventarioXlsx(req, res) {
   }
 
   if (!headerRowIndex) {
-    return res.status(400).json({ error: "Cabecalho invalido" });
+    throw makeError(400, "Cabecalho invalido");
   }
 
   const errors = [];
@@ -288,26 +290,23 @@ async function importInventarioXlsx(req, res) {
   }
 
   if (quantitiesByCode.size === 0) {
-    return res.status(400).json({
-      error: "Nenhuma leitura valida encontrada",
-      errors,
-    });
+    const error = makeError(400, "Nenhuma leitura valida encontrada");
+    error.details = errors;
+    throw error;
   }
 
   const periods = readInventoryPeriods();
-  const inventoryIdRaw = String(
-    req.body?.inventario_id ?? req.body?.inventarioId ?? ""
-  ).trim();
+  const inventoryIdRaw = String(inventarioId ?? "").trim();
   let inventory = inventoryIdRaw
     ? periods.find((item) => item.id === inventoryIdRaw)
     : null;
 
   if (inventoryIdRaw && !inventory) {
-    return res.status(404).json({ error: "Inventario nao encontrado" });
+    throw makeError(404, "Inventario nao encontrado");
   }
 
   if (inventory && inventory.status !== "aberto") {
-    return res.status(400).json({ error: "Inventario fechado" });
+    throw makeError(400, "Inventario fechado");
   }
 
   if (!inventory) {
@@ -366,10 +365,9 @@ async function importInventarioXlsx(req, res) {
   const allErrors = [...errors, ...errorsByProduct];
 
   if (readsToInsert.length === 0) {
-    return res.status(400).json({
-      error: "Nenhuma leitura valida encontrada",
-      errors: allErrors,
-    });
+    const error = makeError(400, "Nenhuma leitura valida encontrada");
+    error.details = allErrors;
+    throw error;
   }
 
   writeProductInventory([...existingReads, ...readsToInsert]);
@@ -379,12 +377,33 @@ async function importInventarioXlsx(req, res) {
     total_leituras: totalLeituras,
   });
 
-  res.json({
+  return {
     inventario: inventory,
     total_produtos: totalProdutos,
     total_leituras: totalLeituras,
     errors: allErrors,
-  });
+  };
+}
+
+async function importInventarioXlsx(req, res) {
+  if (!req.file) {
+    return res.status(400).json({ error: "Arquivo nao informado" });
+  }
+
+  try {
+    const payload = await importInventarioFromBuffer({
+      buffer: req.file.buffer,
+      inventarioId: req.body?.inventario_id ?? req.body?.inventarioId,
+    });
+    res.json(payload);
+  } catch (error) {
+    const status = error.status || 400;
+    const response = { error: error.message };
+    if (Array.isArray(error.details)) {
+      response.errors = error.details;
+    }
+    res.status(status).json(response);
+  }
 }
 
 function deleteInventario(req, res) {
@@ -445,25 +464,25 @@ function closeInventario(req, res) {
   res.json(updated);
 }
 
-function mergeInventarios(req, res) {
-  const fromId = String(req.body?.fromInventarioId ?? "").trim();
-  const toId = String(req.body?.toInventarioId ?? "").trim();
+function applyMergeInventarios(payload) {
+  const fromId = String(payload?.fromInventarioId ?? "").trim();
+  const toId = String(payload?.toInventarioId ?? "").trim();
 
   if (!fromId || !toId) {
-    return res.status(400).json({ error: "Inventarios invalidos" });
+    throw makeError(400, "Inventarios invalidos");
   }
   if (fromId === toId) {
-    return res.status(400).json({ error: "Inventarios iguais" });
+    throw makeError(400, "Inventarios iguais");
   }
 
   const periods = readInventoryPeriods();
   const fromInventory = periods.find((item) => item.id === fromId);
   const toInventory = periods.find((item) => item.id === toId);
   if (!fromInventory || !toInventory) {
-    return res.status(404).json({ error: "Inventario nao encontrado" });
+    throw makeError(404, "Inventario nao encontrado");
   }
   if (fromInventory.status !== "aberto" || toInventory.status !== "aberto") {
-    return res.status(400).json({ error: "Inventario fechado" });
+    throw makeError(400, "Inventario fechado");
   }
 
   const items = readProductInventory();
@@ -479,11 +498,21 @@ function mergeInventarios(req, res) {
   writeProductInventory(updatedItems);
   logEvent("inventario_merged", { from: fromId, to: toId, moved });
 
-  res.json({
+  return {
     from: fromInventory,
     to: toInventory,
     moved,
-  });
+  };
+}
+
+function mergeInventarios(req, res) {
+  try {
+    const payload = applyMergeInventarios(req.body ?? {});
+    res.json(payload);
+  } catch (error) {
+    const status = error.status || 400;
+    res.status(status).json({ error: error.message });
+  }
 }
 
 async function exportInventario(req, res) {
@@ -582,9 +611,11 @@ module.exports = {
   updateInventario,
   updateInventarioNome,
   importInventarioXlsx,
+  importInventarioFromBuffer,
   mergeInventarios,
   deleteInventario,
   closeInventario,
   closeOpenInventario,
   exportInventario,
+  applyMergeInventarios,
 };

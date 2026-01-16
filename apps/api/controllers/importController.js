@@ -5,6 +5,12 @@ const {
   importInventarioFromCsvContent,
 } = require("../services/importService");
 
+function makeError(status, message) {
+  const error = new Error(message);
+  error.status = status;
+  return error;
+}
+
 const inventoryFile = path.join(__dirname, "..", "..", "resources", "inventario.csv");
 const productPdfFile = path.join(
   __dirname,
@@ -46,20 +52,18 @@ function importInventario(req, res) {
   res.json(result);
 }
 
-async function importAuto(req, res) {
-  if (!req.file?.buffer) {
-    return res.status(400).json({ error: "Arquivo nao enviado" });
+async function importAutoFromBuffer({ buffer, filename, mimetype }) {
+  if (!buffer) {
+    throw makeError(400, "Arquivo nao enviado");
   }
-
-  const fileName = String(req.file.originalname ?? "").toLowerCase();
-  const mimeType = String(req.file.mimetype ?? "").toLowerCase();
+  const fileName = String(filename ?? "").toLowerCase();
+  const mimeType = String(mimetype ?? "").toLowerCase();
 
   if (fileName.endsWith(".pdf") || mimeType === "application/pdf") {
     try {
-      const result = await importProductsFromPdfBuffer(req.file.buffer);
-      return res.json(result);
+      return await importProductsFromPdfBuffer(buffer);
     } catch (error) {
-      return res.status(500).json({ error: "Falha ao ler PDF" });
+      throw makeError(500, "Falha ao ler PDF");
     }
   }
 
@@ -69,16 +73,29 @@ async function importAuto(req, res) {
     mimeType === "text/plain" ||
     mimeType === "application/vnd.ms-excel"
   ) {
-    const content = req.file.buffer.toString("utf8");
-    const result = importInventarioFromCsvContent(content);
-    return res.json(result);
+    const content = Buffer.from(buffer).toString("utf8");
+    return importInventarioFromCsvContent(content);
   }
 
-  return res.status(400).json({ error: "Tipo de arquivo nao suportado" });
+  throw makeError(400, "Tipo de arquivo nao suportado");
+}
+
+async function importAuto(req, res) {
+  try {
+    const result = await importAutoFromBuffer({
+      buffer: req.file?.buffer,
+      filename: req.file?.originalname,
+      mimetype: req.file?.mimetype,
+    });
+    return res.json(result);
+  } catch (error) {
+    return res.status(error.status || 400).json({ error: error.message });
+  }
 }
 
 module.exports = {
   importProdutos,
   importInventario,
   importAuto,
+  importAutoFromBuffer,
 };

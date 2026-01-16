@@ -38,6 +38,76 @@ function findProductByCode(products, { codigo, codigo_barras, raw }) {
   return product || null;
 }
 
+function makeError(status, message) {
+  const error = new Error(message);
+  error.status = status;
+  return error;
+}
+
+function applyLeituraAdd(body) {
+  const parsed = parseCodeInput(body);
+  if (parsed.error) {
+    throw makeError(400, "Codigo nao informado");
+  }
+
+  const products = readProducts();
+  const product = findProductByCode(products, parsed);
+  if (!product) {
+    throw makeError(404, "Produto nao encontrado");
+  }
+  const config = readConfig();
+
+  const periods = readInventoryPeriods();
+  const inventoryId = String(body.inventarioId ?? body.inventario_id ?? "").trim();
+  const resolved = ensureInventoryForRead(periods, inventoryId);
+  if (resolved.error) {
+    throw makeError(404, resolved.error);
+  }
+  const { inventory, created } = resolved;
+  if (created) {
+    writeInventoryPeriods(periods);
+  }
+
+  const items = readProductInventory();
+  const readEvent = buildReadEvent({
+    product,
+    inventoryId: inventory.id,
+    config,
+  });
+  items.push(readEvent);
+
+  writeProductInventory(items);
+  const aggregated = aggregateInventoryItems({
+    items,
+    products,
+    config,
+    inventoryId: inventory.id,
+    includeProduct: true,
+  });
+  const acumulado = aggregated.find(
+    (item) => item.id_produto === readEvent.id_produto
+  );
+  const recent_reads = buildRecentReads({
+    items,
+    products,
+    config,
+    inventoryId: inventory.id,
+    limit: 5,
+  });
+  logEvent("leitura_created", {
+    inventario_id: inventory.id,
+    leitura_id: readEvent.id,
+    produto_id: readEvent.id_produto,
+  });
+  return {
+    produto: product,
+    inventario: inventory,
+    leitura: readEvent,
+    acumulado,
+    recent_reads,
+  };
+}
+
 function ensureOpenInventory(periods) {
   const open = getOpenInventory(periods);
   if (open) return { inventory: open, created: false };
@@ -116,67 +186,13 @@ function listOpenProdutoInventario(req, res) {
 }
 
 function createProdutoInventario(req, res) {
-  const parsed = parseCodeInput(req.body);
-  if (parsed.error) {
-    return res.status(400).json({ error: "Codigo nao informado" });
+  try {
+    const payload = applyLeituraAdd(req.body ?? {});
+    res.json(payload);
+  } catch (error) {
+    const status = error.status || 400;
+    res.status(status).json({ error: error.message });
   }
-
-  const products = readProducts();
-  const product = findProductByCode(products, parsed);
-  if (!product) {
-    return res.status(404).json({ error: "Produto nao encontrado" });
-  }
-  const config = readConfig();
-
-  const periods = readInventoryPeriods();
-  const inventoryId = String(req.body.inventarioId ?? req.body.inventario_id ?? "").trim();
-  const resolved = ensureInventoryForRead(periods, inventoryId);
-  if (resolved.error) {
-    return res.status(404).json({ error: resolved.error });
-  }
-  const { inventory, created } = resolved;
-  if (created) {
-    writeInventoryPeriods(periods);
-  }
-
-  const items = readProductInventory();
-  const readEvent = buildReadEvent({
-    product,
-    inventoryId: inventory.id,
-    config,
-  });
-  items.push(readEvent);
-
-  writeProductInventory(items);
-  const aggregated = aggregateInventoryItems({
-    items,
-    products,
-    config,
-    inventoryId: inventory.id,
-    includeProduct: true,
-  });
-  const acumulado = aggregated.find(
-    (item) => item.id_produto === readEvent.id_produto
-  );
-  const recent_reads = buildRecentReads({
-    items,
-    products,
-    config,
-    inventoryId: inventory.id,
-    limit: 5,
-  });
-  logEvent("leitura_created", {
-    inventario_id: inventory.id,
-    leitura_id: readEvent.id,
-    produto_id: readEvent.id_produto,
-  });
-  res.json({
-    produto: product,
-    inventario: inventory,
-    leitura: readEvent,
-    acumulado,
-    recent_reads,
-  });
 }
 
 function updateProdutoInventario(req, res) {
@@ -226,4 +242,5 @@ module.exports = {
   createProdutoInventario,
   updateProdutoInventario,
   deleteProdutoInventario,
+  applyLeituraAdd,
 };

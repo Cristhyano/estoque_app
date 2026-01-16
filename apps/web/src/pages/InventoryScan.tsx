@@ -12,6 +12,12 @@ import {
 } from "../components/Table"
 import { Barcode } from "lucide-react"
 import { apiBaseUrl } from "../config"
+import {
+    fetchWithTimeout,
+    isOfflineError,
+    queueJsonMutation,
+    type QueuedResult,
+} from "../offlineQueue"
 
 type ProdutoInventarioItem = {
     id_produto: string
@@ -155,28 +161,45 @@ const InventoryScan = () => {
 
     const mutation = useMutation({
         mutationFn: async (payload: { codigo: string }) => {
-            const response = await fetch(`${apiBaseUrl}/produto-inventario`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    ...payload,
-                    inventarioId: selectedInventoryId || undefined,
-                }),
-            })
-            if (!response.ok) {
-                const errorBody = await response.json().catch(() => ({}))
-                const errorMessage =
-                    errorBody?.error || "Erro ao registrar leitura"
-                throw new Error(errorMessage)
+            const responsePayload = {
+                ...payload,
+                inventarioId: selectedInventoryId || undefined,
             }
-            return (await response.json()) as ProdutoInventarioResponse
+            try {
+                const response = await fetchWithTimeout(`${apiBaseUrl}/produto-inventario`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(responsePayload),
+                })
+                if (!response.ok) {
+                    const errorBody = await response.json().catch(() => ({}))
+                    const errorMessage =
+                        errorBody?.error || "Erro ao registrar leitura"
+                    throw new Error(errorMessage)
+                }
+                return (await response.json()) as ProdutoInventarioResponse
+            } catch (error) {
+                if (isOfflineError(error)) {
+                    return await queueJsonMutation({
+                        kind: "scan",
+                        payload: responsePayload,
+                    })
+                }
+                throw error
+            }
         },
         onSuccess: (payload) => {
+            if ((payload as QueuedResult)?.queued) {
+                setMessage({ type: "success", text: "Leitura salva offline" })
+                playBeep("success")
+                return
+            }
+            const response = payload as ProdutoInventarioResponse
             setMessage({ type: "success", text: "Leitura registrada" })
-            const rel = payload.acumulado
-            const productId = rel?.id_produto ?? payload.leitura?.id_produto
+            const rel = response.acumulado
+            const productId = rel?.id_produto ?? response.leitura?.id_produto
             if (productId) {
                 setHighlightId(productId)
             }
@@ -187,7 +210,7 @@ const InventoryScan = () => {
                 setHighlightId(null)
             }, 800)
             playBeep("success")
-            const targetKey = ["produto-inventario-open", payload.inventario.id]
+            const targetKey = ["produto-inventario-open", response.inventario.id]
             queryClient.setQueryData<ProdutoInventarioOpenResponse | undefined>(
                 targetKey,
                 (current) => {
@@ -201,7 +224,7 @@ const InventoryScan = () => {
                         )
                         const nextItem = {
                             ...rel,
-                            produto: payload.produto ?? rel.produto ?? null,
+                            produto: response.produto ?? rel.produto ?? null,
                         }
                         if (index >= 0) {
                             nextItems[index] = nextItem
@@ -209,11 +232,11 @@ const InventoryScan = () => {
                             nextItems.unshift(nextItem)
                         }
                     }
-                    const recentReads = payload.recent_reads ?? current.recent_reads ?? []
+                    const recentReads = response.recent_reads ?? current.recent_reads ?? []
                     return {
                         ...current,
                         items: nextItems,
-                        inventario: payload.inventario,
+                        inventario: response.inventario,
                         recent_reads: recentReads,
                     }
                 }
@@ -239,22 +262,41 @@ const InventoryScan = () => {
                 searchParams.set("inventario_id", payload.inventoryId)
             }
             const query = searchParams.toString()
-            const response = await fetch(
-                `${apiBaseUrl}/leituras/${payload.id}${query ? `?${query}` : ""}`,
-                { method: "DELETE" }
-            )
-            if (!response.ok) {
-                const errorBody = await response.json().catch(() => ({}))
-                const errorMessage =
-                    errorBody?.error || "Erro ao remover leitura"
-                throw new Error(errorMessage)
+            const path = `/leituras/${payload.id}${query ? `?${query}` : ""}`
+            try {
+                const response = await fetchWithTimeout(`${apiBaseUrl}${path}`, {
+                    method: "DELETE",
+                })
+                if (!response.ok) {
+                    const errorBody = await response.json().catch(() => ({}))
+                    const errorMessage =
+                        errorBody?.error || "Erro ao remover leitura"
+                    throw new Error(errorMessage)
+                }
+                return (await response.json()) as ProdutoInventarioOpenResponse
+            } catch (error) {
+                if (isOfflineError(error)) {
+                    return await queueJsonMutation({
+                        kind: "remove_read",
+                        payload: {
+                            id: payload.id,
+                            inventario_id: payload.inventoryId,
+                            quantidade: payload.quantidade,
+                        },
+                    })
+                }
+                throw error
             }
-            return (await response.json()) as ProdutoInventarioOpenResponse
         },
         onSuccess: (payload) => {
+            if ((payload as QueuedResult)?.queued) {
+                setMessage({ type: "success", text: "Remocao salva offline" })
+                return
+            }
+            const response = payload as ProdutoInventarioOpenResponse
             queryClient.setQueryData(
-                ["produto-inventario-open", payload.inventario.id],
-                payload
+                ["produto-inventario-open", response.inventario.id],
+                response
             )
         },
         onError: (err: Error) => {

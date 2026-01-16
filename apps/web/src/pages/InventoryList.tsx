@@ -9,6 +9,12 @@ import { useNavigate } from "@tanstack/react-router"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import * as Dialog from "@radix-ui/react-dialog"
 import { apiBaseUrl } from "../config"
+import {
+    fetchWithTimeout,
+    isOfflineError,
+    queueFileMutation,
+    queueJsonMutation,
+} from "../offlineQueue"
 
 type InventoryFilters = {
     status: string
@@ -132,10 +138,14 @@ const InventoryList = () => {
             if (selectedImportInventoryId) {
                 formData.append("inventario_id", selectedImportInventoryId)
             }
-            const response = await fetch(`${apiBaseUrl}/inventarios/import`, {
-                method: "POST",
-                body: formData,
-            })
+            const response = await fetchWithTimeout(
+                `${apiBaseUrl}/inventarios/import`,
+                {
+                    method: "POST",
+                    body: formData,
+                },
+                20000
+            )
             if (!response.ok) {
                 const errorBody = await response.json().catch(() => ({}))
                 const errorMessage = errorBody?.error || "Falha ao importar"
@@ -152,7 +162,21 @@ const InventoryList = () => {
             }
         } catch (error) {
             console.error(error)
-            setImportStatus(error instanceof Error ? error.message : "Erro na importacao")
+            if (isOfflineError(error) && importFile) {
+                await queueFileMutation({
+                    kind: "import_inventory",
+                    file: importFile,
+                    extra: selectedImportInventoryId
+                        ? { inventario_id: selectedImportInventoryId }
+                        : undefined,
+                })
+                setImportStatus("Importacao salva offline")
+                setImportFile(null)
+                setImportInputKey((prev) => prev + 1)
+                setSelectedImportInventoryId("")
+            } else {
+                setImportStatus(error instanceof Error ? error.message : "Erro na importacao")
+            }
         } finally {
             setIsImporting(false)
         }
@@ -179,7 +203,7 @@ const InventoryList = () => {
         setIsMerging(true)
         setMergeStatus(null)
         try {
-            const response = await fetch(`${apiBaseUrl}/inventarios/merge`, {
+            const response = await fetchWithTimeout(`${apiBaseUrl}/inventarios/merge`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -200,7 +224,20 @@ const InventoryList = () => {
             setMergeToId("")
         } catch (error) {
             console.error(error)
-            setMergeStatus(error instanceof Error ? error.message : "Erro na mesclagem")
+            if (isOfflineError(error)) {
+                await queueJsonMutation({
+                    kind: "merge_inventory",
+                    payload: {
+                        fromInventarioId: mergeFromId,
+                        toInventarioId: mergeToId,
+                    },
+                })
+                setMergeStatus("Mesclagem salva offline")
+                setMergeFromId("")
+                setMergeToId("")
+            } else {
+                setMergeStatus(error instanceof Error ? error.message : "Erro na mesclagem")
+            }
         } finally {
             setIsMerging(false)
         }

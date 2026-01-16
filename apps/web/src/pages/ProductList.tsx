@@ -8,6 +8,11 @@ import { ArrowDown, ArrowUp, BanknoteArrowDown, BanknoteArrowUp, Barcode, Text, 
 import { useQueryClient } from "@tanstack/react-query"
 import * as Dialog from "@radix-ui/react-dialog"
 import { apiBaseUrl } from "../config"
+import {
+    fetchWithTimeout,
+    isOfflineError,
+    queueFileMutation,
+} from "../offlineQueue"
 
 type ProductFilters = {
     codigo: string
@@ -96,10 +101,14 @@ const ProductList = () => {
         try {
             const formData = new FormData()
             formData.append("file", importFile)
-            const response = await fetch(`${apiBaseUrl}/import`, {
-                method: "POST",
-                body: formData,
-            })
+            const response = await fetchWithTimeout(
+                `${apiBaseUrl}/import`,
+                {
+                    method: "POST",
+                    body: formData,
+                },
+                20000
+            )
             if (!response.ok) {
                 throw new Error("Falha ao importar")
             }
@@ -111,7 +120,17 @@ const ProductList = () => {
             setImportResult(result)
         } catch (error) {
             console.error(error)
-            setImportStatus("Erro na importacao")
+            if (isOfflineError(error) && importFile) {
+                await queueFileMutation({
+                    kind: "import_products",
+                    file: importFile,
+                })
+                setImportStatus("Importacao salva offline")
+                setImportFile(null)
+                setImportInputKey((prev) => prev + 1)
+            } else {
+                setImportStatus("Erro na importacao")
+            }
         } finally {
             setIsImporting(false)
         }
