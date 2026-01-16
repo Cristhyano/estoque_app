@@ -121,13 +121,21 @@ const ProductList = () => {
         } catch (error) {
             console.error(error)
             if (isOfflineError(error) && importFile) {
-                await queueFileMutation({
-                    kind: "import_products",
-                    file: importFile,
-                })
-                setImportStatus("Importacao salva offline")
-                setImportFile(null)
-                setImportInputKey((prev) => prev + 1)
+                try {
+                    await queueFileMutation({
+                        kind: "import_products",
+                        file: importFile,
+                    })
+                    setImportStatus("Importacao salva offline")
+                    setImportFile(null)
+                    setImportInputKey((prev) => prev + 1)
+                } catch (queueError) {
+                    setImportStatus(
+                        queueError instanceof Error
+                            ? queueError.message
+                            : "Erro na importacao offline"
+                    )
+                }
             } else {
                 setImportStatus("Erro na importacao")
             }

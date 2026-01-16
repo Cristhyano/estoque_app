@@ -163,17 +163,25 @@ const InventoryList = () => {
         } catch (error) {
             console.error(error)
             if (isOfflineError(error) && importFile) {
-                await queueFileMutation({
-                    kind: "import_inventory",
-                    file: importFile,
-                    extra: selectedImportInventoryId
-                        ? { inventario_id: selectedImportInventoryId }
-                        : undefined,
-                })
-                setImportStatus("Importacao salva offline")
-                setImportFile(null)
-                setImportInputKey((prev) => prev + 1)
-                setSelectedImportInventoryId("")
+                try {
+                    await queueFileMutation({
+                        kind: "import_inventory",
+                        file: importFile,
+                        extra: selectedImportInventoryId
+                            ? { inventario_id: selectedImportInventoryId }
+                            : undefined,
+                    })
+                    setImportStatus("Importacao salva offline")
+                    setImportFile(null)
+                    setImportInputKey((prev) => prev + 1)
+                    setSelectedImportInventoryId("")
+                } catch (queueError) {
+                    setImportStatus(
+                        queueError instanceof Error
+                            ? queueError.message
+                            : "Erro na importacao offline"
+                    )
+                }
             } else {
                 setImportStatus(error instanceof Error ? error.message : "Erro na importacao")
             }

@@ -1,6 +1,10 @@
 ﻿const { initStorage } = require("../utils/storage");
 const { listPendingEvents, markEventsSynced } = require("../utils/events");
-const { isEventProcessed, markEventProcessed } = require("../utils/syncEvents");
+const {
+  getEventState,
+  markEventProcessing,
+  markEventApplied,
+} = require("../utils/syncEvents");
 const { applyLeituraAdd } = require("./produtoInventarioController");
 const { applyLeituraRemove } = require("./leiturasController");
 const { importAutoFromBuffer } = require("./importController");
@@ -13,6 +17,7 @@ const SUPPORTED_EVENT_TYPES = new Set([
   "IMPORT_INVENTARIO",
   "MERGE_INVENTARIO",
 ]);
+const STALE_PROCESSING_MS = 60 * 1000;
 
 function decodeFilePayload(filePayload) {
   if (!filePayload || !filePayload.base64) return null;
@@ -116,14 +121,28 @@ async function applySyncEvents(req, res) {
       });
     }
 
-    if (isEventProcessed(event.event_id)) {
+    const existing = getEventState(event.event_id);
+    if (existing?.status === "applied") {
       applied.push(event.event_id);
       continue;
     }
+    if (existing?.status === "processing") {
+      const updatedAt = new Date(String(existing.updated_at || "")).getTime();
+      const isStale =
+        Number.isNaN(updatedAt) || Date.now() - updatedAt > STALE_PROCESSING_MS;
+      if (!isStale) {
+        return res.status(409).json({
+          error: "Evento em processamento",
+          failed_event: event,
+          applied,
+        });
+      }
+    }
 
     try {
+      markEventProcessing(event);
       await applySyncEvent(event);
-      markEventProcessed(event);
+      markEventApplied(event);
       applied.push(event.event_id);
     } catch (error) {
       const status = error.status || 400;

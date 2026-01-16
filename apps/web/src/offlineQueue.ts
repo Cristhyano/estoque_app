@@ -35,6 +35,9 @@ const STORE_NAME = "event_queue";
 const DB_VERSION = 2;
 const QUEUE_INTERVAL_MS = 20000;
 const DEFAULT_TIMEOUT_MS = 10000;
+const MAX_OFFLINE_FILE_BYTES = 15 * 1024 * 1024;
+const OFFLINE_FILE_TOO_LARGE_MESSAGE =
+  "Arquivo grande demais para importacao offline. Conecte-se para importar online.";
 
 let queueProcessing = false;
 let queueInitialized = false;
@@ -199,6 +202,9 @@ const queueFileMutation = async (input: {
   file: File;
   extra?: Record<string, string>;
 }) => {
+  if (input.file.size > MAX_OFFLINE_FILE_BYTES) {
+    throw new Error(OFFLINE_FILE_TOO_LARGE_MESSAGE);
+  }
   const filePayload = await serializeFile(input.file);
   const payload: Record<string, unknown> = { file: filePayload };
   if (input.extra) {
